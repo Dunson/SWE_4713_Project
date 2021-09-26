@@ -1,0 +1,55 @@
+{% extends "base.html" %} 
+{% block title %} Reset Verified {% endblock %}
+
+{% block content %}
+<form method="POST">
+    <h3 align="center">Reset Password</h3>
+      <div class="container-lg pt-3 pb-3 col-5 bg-dark text-white">
+          <div class="form-group">
+              <div class="col-auto px-3 pt-2 align-items-center">
+                <label for="password1">New Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="password1"
+                  name="password1"
+                  placeholder="Password"
+                />
+                <small id="passwordHelpBlock" class="form-text text-white">
+                    Password Requirements: <br>
+                    <ul>
+                        <li>Must be a minimum of 8 characters</li>
+                        <li>Must start with a letter</li>
+                        <li>Must contain a letter, a number, and a special character</li>
+                    </ul>
+                </small>
+              </div>
+          </div>
+
+          <div class="form-group">
+            <div class="col-auto px-3 pt-2 align-items-center">
+              <label for="password2">Confirm New Password</label>
+              <input
+                type="password"
+                class="form-control"
+                id="password2"
+                name="password2"
+                placeholder="Password"
+              />
+              <small id="passwordHelpBlock" class="form-text text-white">
+                  Passwords must match
+              </small>
+            </div>
+        </div>
+
+      </div>
+  
+      <br>
+      <div class="col text-center">
+          <button type="Submit" class="btn btn-primary">Reset Password</button>
+        </div>
+  
+  </form>
+
+
+{% endblock %}

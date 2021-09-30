@@ -61,30 +61,30 @@ def sign_up():
 
 
         user = User.query.filter_by(email=email).first()
+        pwd_check = User.password_check(password1)
 
-        validEmail = False
-        if '@' in email:
-            validEmail = True
 
         # The password conditions still need to satisfy the requirements
         if user:
             flash('An account with that email already exists!', category='error')
-        elif not validEmail:
-            flash('Email must be of valid syntax: example@domain.com', category='error')
         elif len(firstName) < 2:
             flash('First name must be greater than 1 character', category='error')
         elif password1 != password2: # This compares the two passwords
             flash('Passwords do not match', category='error')
-        elif len(password1) < 8: # This is only part of the password requirement. 
-            flash('Password does not have enough characters', category='error')
+        elif not pwd_check:  
+            flash('Password does not meet the requirements', category='error')
         else:
             # Add user to database
-            new_user = User(email=email, firstName=firstName, lastName=lastName, password=generate_password_hash(password1, method='sha256'), userName = userNameGen(firstName, lastName))
+            new_user = User(email=email, firstName=firstName, lastName=lastName, 
+                password=generate_password_hash(password1, method='sha256'), 
+                userName = userNameGen(firstName, lastName),
+                hasAdmin = False, hasMan = False)
+            
             db.session.add(new_user)
             db.session.commit()     
-            login_user(user, remember=True)
+            
             flash('Account Created', category='success')
-            return redirect(url_for('views.home'))
+            return redirect(url_for('auth.login'))
 
     
     return render_template("signUp.html", user = current_user)
@@ -118,17 +118,36 @@ def reset_password(token):
         flash('Reset Token Expired!',category='error')
         return redirect(url_for('auth.login'))
 
-    password = request.form.get('password1')
+    password1 = request.form.get('password1')
     password2 = request.form.get('password2')
-
-    if password:
-        if password == password2:
-            user.reset_password(password, commit=True)
+    
+    if password1:
+        if password1 == password2:
+            user.reset_password(password1, commit=True)
             flash('Password Reset Successful!!', category='success')
             return redirect(url_for('auth.login'))
         else:
             flash('Passwords must match!', category='error')
-    
-
 
     return render_template('reset_verified.html', user=current_user)   
+
+
+#Method for admin portal access. 
+#This works under the assumption that there is only one admin in the database
+@auth.route('/adminPortal', methods = ['GET', 'POST'])
+@login_required
+def adminPort():
+    
+    #Query the database for an admin user
+    adminUser = User.query.filter_by(hasAdmin = True).first()
+
+    #check if that admin user is the current user
+    if adminUser == current_user:
+        return render_template('adminPortal.html', user = current_user, query = User.query.all())
+    else:
+        flash('You do not have access to this page!', category='error')
+        return redirect(url_for('views.home'))
+
+
+    #return render_template('adminPortal.html', user = current_user)
+

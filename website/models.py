@@ -5,6 +5,7 @@ from sqlalchemy.sql import func
 from time import time
 import os
 import jwt
+import re
 
 
 
@@ -16,6 +17,8 @@ class User(db.Model, UserMixin):
     firstName = db.Column(db.String(150))
     lastName = db.Column(db.String(150))
     userName = db.Column(db.String(150))
+    hasAdmin = db.Column(db.Boolean, default=False)
+    hasMan = db.Column(db.Boolean, default = False)
 
 
 
@@ -39,4 +42,23 @@ class User(db.Model, UserMixin):
             print(e)
             return
         return User.query.filter_by(email=email).first()
-    
+
+
+    #Method for password validation
+    def password_check(password):
+        
+        length_error = len(password) < 8
+
+        digit_error = re.search(r"\d", password) is None
+
+        uppercase_error = re.search(r"[A-Z]", password) is None
+
+        lowercase_error = re.search(r"[a-z]", password) is None
+
+        symbol_error = re.search(r"[ !#$%&'()*+,-./[\\\]^_`{|}~"+r'"]', password) is None
+
+        password_ok = not (length_error or digit_error or uppercase_error or lowercase_error or symbol_error)
+
+        return password_ok
+
+

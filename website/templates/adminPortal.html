@@ -1,0 +1,77 @@
+{% extends "base.html" %} 
+{% block title %} Admin Portal {% endblock %}
+
+{%block content%}
+<h1 class="text-center">System Overview</h1>
+<br>
+<style>
+table 
+{
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th 
+{
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) 
+{
+  background-color: #dddddd;
+}
+
+tr:nth-child(odd) 
+{
+  background-color: white;
+}
+
+
+</style>
+
+
+<div class="container bg-dark px-2 py-2">
+    <h2 class = "text-center text-light">Accounts:</h2>
+
+
+    <table >
+        <tr>
+          <th>ID#:</th>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Email</th>
+          <th>Username</th>
+          <th>Type</th>
+        </tr>
+
+        {% for user in query %}
+        <tr>
+          <td>{{user.id}}</td>
+          <td>{{user.firstName}}</td>
+          <td>{{user.lastName}}</td>
+          <td>{{user.email}}</td>
+          <td>{{user.userName}}</td>
+          {% if user.hasAdmin%}
+          <td>Administrator</td>
+          {% elif user.hasMan %}
+          <td>Manager</td>
+          {% else %}
+          <td>User</td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </table>
+      <br>
+      <div class="text-center">
+        <button type="button" class="btn btn-success">Edit</button>
+      </div>
+
+</div>
+
+
+
+
+{% endblock %}

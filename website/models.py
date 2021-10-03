@@ -6,19 +6,40 @@ from time import time
 import os
 import jwt
 import re
+from datetime import datetime
 
 
 
 #Defined User Model for database
 class User(db.Model, UserMixin):
+
     id = db.Column(db.Integer, primary_key=True) #unique identifier
     email = db.Column(db.String(150), unique = True)
     password = db.Column(db.String(150))
+    oldPassword = db.Column(db.String(150))
     firstName = db.Column(db.String(150))
     lastName = db.Column(db.String(150))
     userName = db.Column(db.String(150))
-    hasAdmin = db.Column(db.Boolean, default=False)
+    hasAdmin = db.Column(db.Boolean, default = False)
     hasMan = db.Column(db.Boolean, default = False)
+    status = db.Column(db.Boolean, default = False)
+    creationDate = db.Column(db.Date())
+    
+
+    #Generates userName based on firstname, lastname and month&year of when account was created
+    def userNameGen(self, first, last):
+        firstN = User.query.filter_by(firstName=first).first()
+        lastN = User.query.filter_by(lastName=last).first()
+        currMonth = str(datetime.now().month)
+        currYear = str(datetime.now().year)
+
+        
+        if len(currMonth) < 2:
+            currMonth = '0' + currMonth
+            
+        userName = str(firstN[0]) + str(lastN) + currMonth + currYear[2] + currYear[3]
+        return userName
+
 
 
 
@@ -45,6 +66,7 @@ class User(db.Model, UserMixin):
 
 
     #Method for password validation
+    #This method was supplied by: 
     def password_check(password):
         
         length_error = len(password) < 8

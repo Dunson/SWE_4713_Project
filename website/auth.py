@@ -12,17 +12,30 @@ auth = Blueprint('auth', __name__)
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
+
         email = request.form.get('email')
         password = request.form.get('password')
 
         user = User.query.filter_by(email=email).first()
+
         if user:
+
+            if user.status == False:
+                flash('Your account must be activated by an administrator.', category='error')
+                return redirect(url_for('auth.login'))
+            
+            if user.hasAdmin == True:
+                flash('Admin login successful!', category='success')
+                login_user(user)
+                return redirect(url_for('auth.adminPort'))
+
             if check_password_hash(user.password, password):
                 flash('Login Succeful!', category='success')
                 login_user(user)
                 return redirect(url_for('views.home'))
             else:
                 flash('Incorrect Password!', category='error')
+
         else:
             flash('Required fields are empty!', category='error')
     return render_template("login.html", user = current_user)
@@ -45,6 +58,7 @@ def sign_up():
         password1 = request.form.get('password1')
         password2 = request.form.get('password2')
 
+        
         #Generates userName based on firstname, lastname and month&year of when account was created
         def userNameGen(first, last):
             first = firstName
@@ -54,11 +68,10 @@ def sign_up():
 
             if len(currMonth) < 2:
                 currMonth = '0' + currMonth
+            
             userName = first[0] + last + currMonth + currYear[2] + currYear[3]
-            print(userName)
             return userName
-
-
+        
 
         user = User.query.filter_by(email=email).first()
         pwd_check = User.password_check(password1)
@@ -78,7 +91,8 @@ def sign_up():
             new_user = User(email=email, firstName=firstName, lastName=lastName, 
                 password=generate_password_hash(password1, method='sha256'), 
                 userName = userNameGen(firstName, lastName),
-                hasAdmin = False, hasMan = False)
+                hasAdmin = False, hasMan = False, status = False, 
+                creationDate = datetime.now())
             
             db.session.add(new_user)
             db.session.commit()     
@@ -132,22 +146,24 @@ def reset_password(token):
     return render_template('reset_verified.html', user=current_user)   
 
 
-#Method for admin portal access. 
-#This works under the assumption that there is only one admin in the database
+#Method for admin portal access and updating user info on POST request
 @auth.route('/adminPortal', methods = ['GET', 'POST'])
 @login_required
 def adminPort():
-    
-    #Query the database for an admin user
-    adminUser = User.query.filter_by(hasAdmin = True).first()
 
-    #check if that admin user is the current user
-    if adminUser == current_user:
-        return render_template('adminPortal.html', user = current_user, query = User.query.all())
+    #Logic for updating accounts
+    if request.method == 'POST':
+        print('POST Request')
+
+
+    
+    if current_user.hasAdmin:
+        return render_template('adminPortal.html', 
+            user = current_user, query = User.query.all(), selUser = current_user)
     else:
         flash('You do not have access to this page!', category='error')
         return redirect(url_for('views.home'))
 
 
-    #return render_template('adminPortal.html', user = current_user)
+    
 

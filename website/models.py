@@ -25,21 +25,7 @@ class User(db.Model, UserMixin):
     status = db.Column(db.Boolean, default = False)
     creationDate = db.Column(db.Date())
     
-
-    #Generates userName based on firstname, lastname and month&year of when account was created
-    def userNameGen(self, first, last):
-        firstN = User.query.filter_by(firstName=first).first()
-        lastN = User.query.filter_by(lastName=last).first()
-        currMonth = str(datetime.now().month)
-        currYear = str(datetime.now().year)
-
-        
-        if len(currMonth) < 2:
-            currMonth = '0' + currMonth
-            
-        userName = str(firstN[0]) + str(lastN) + currMonth + currYear[2] + currYear[3]
-        return userName
-
+    
 
 
 

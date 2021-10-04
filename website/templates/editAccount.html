@@ -1,0 +1,97 @@
+{% extends "base.html" %} 
+{% block title %} Edit Account{% endblock %}
+
+{%block content%}
+
+<h3 class="text-center">Edit Account for {{query[request.args.get('searchBar') | int - 1].firstName}} {{query[request.args.get('searchBar') | int - 1].lastName}}</h3>
+
+<form method = "POST">
+
+    <div class="container px-2 py-3 col-5 bg-dark text-white">
+        
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              name="email"
+              value="{{query[request.args.get('searchBar') | int - 1].email}}"
+            />
+          </div>
+      
+        <div class="row">
+            <div class="col">
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="firstName"
+                      name="firstName"
+                      value="{{query[request.args.get('searchBar') | int - 1].firstName}}"
+                    />
+                </div>
+              </div>
+            <div class="col">
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="lastName"
+                      name="lastName"
+                      value="{{query[request.args.get('searchBar') | int - 1].lastName}}"
+                    />
+                  </div>
+            </div>
+        </div>
+
+        
+            <div class="text-center">
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="inlineRadioOptions" {% if query[request.args.get('searchBar') | int - 1].status  == True %} checked {% endif %}/>
+                  <label class="form-check-label" for="inlineRadio" style="color: green">Activated</label>
+                </div>
+      
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="inlineRadioOptions"  {% if query[request.args.get('searchBar') | int - 1].status  == False %} checked {% endif %}/>
+                  <label class="form-check-label" for="inlineRadio" style="color: red">Deactivated</label>
+                </div>
+              </div>
+        
+              <div class="text-center">
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="inlineRadioOptionUserType"  {% if query[request.args.get('searchBar') | int - 1].hasMan  == False and query[request.args.get('searchBar') | int - 1].hasAdmin  == False %} checked {% endif %}/>
+                  <label class="form-check-label" for="inlineRadio" >User</label>
+                </div>
+      
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="inlineRadioOptionsUserType"  {% if query[request.args.get('searchBar') | int - 1].hasMan  == True %} checked {% endif %} />
+                  <label class="form-check-label" for="inlineRadio" >Manager</label>
+                </div>
+    
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="inlineRadioOptionsUserType"  {% if query[request.args.get('searchBar') | int - 1].hasAdmin  == True %} checked {% endif %} />
+                  <label class="form-check-label" for="inlineRadio" >Admininstrator</label>
+                </div>
+              </div>
+          
+          
+          <br>
+
+
+          <div class="text-center">
+            <button class="btn btn-success text-center" type="submit">Save</button>
+            </div>
+    </div>
+
+
+
+
+</form> 
+
+
+
+
+{% endblock %}

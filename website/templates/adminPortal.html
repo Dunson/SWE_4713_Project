@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% block title %} Admin Portal {% endblock %} {%block
 content%}
-<h1 class="text-center">System Overview</h1>
+<h1 class="text-center">Admin Dashboard</h1>
 <br />
 <style>
   table {
@@ -25,8 +25,31 @@ content%}
   }
 </style>
 
-<div class="container bg-dark px-3 py-1">
+<div class="container-fluid bg-dark px-3 py-1 pb-5" >
   <h2 class="text-center text-light">Accounts</h2>
+
+
+  
+    <form class="form-inline" method="POST">
+      
+          
+          <input type="search" name="searchBar" class="form-control pr-1" placeholder="Search by ID#"
+            list = "userData" />
+          
+            <datalist id="userData"> 
+              {% for user in query %}
+              <option name="userIndex" value="{{query[loop.index - 1].id}}">{{user.id}}</option>
+              {% endfor %}
+            </datalist>  
+
+            <button class="btn btn-success" type="submit">Search and Edit</button>
+            
+       
+    </form>
+
+  <br>
+
+
 
   <div style="overflow: scroll; max-height: 220px">
     <table>
@@ -73,118 +96,9 @@ content%}
       {% endfor %}
     </table>
   </div>
-  <div class="text-center pt-2 pb-2">
-    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#editModal">
-      Edit an Account
-    </button>
-  </div>
 
-  <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalCenterTile"
-   aria-hidden="false" >
-    <div class="modal-dialog modal-dialog-centered" role="document" style = "max-width: 700px; max-height: 700px;">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="editModalTitle">Edit Account</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <form method="POST">
-            <div class="row">
-
-              <div class="col container">
-                <div class="col-9 input-group">
-                  <div class="form-outline">
-                    <input type="search" id="searchBar" class="form-control" placeholder="Search by ID"
-                      list = "userData" />
-                    <button class="btn btn-primary" type="button">Search</button>
-                      
   
-                    <datalist id="userData"> 
-                      {% for user in query %}
-                      <option>{{user.id}}</option>
-                      {% endfor %}
-                    </datalist>
-                       
-                  </div>
-                </div>
-              </div>
-              
 
-
-
-              <div class="col container">
-                <div class="btn-group btn-group-toggle pull-right" data-target="buttons">
-                  <label class="btn btn-secondary">
-                    <input type="radio" name="user" id="userOption" autocomplete="off" />
-                    User
-                  </label>
-                  <label class="btn btn-secondary">
-                    <input type="radio" name="manager" id="manOption" autocomplete="off" />
-                    Manager
-                  </label>
-  
-                  <label class="btn btn-secondary">
-                    <input type="radio" name="admin" id="adminOption" autocomplete="off" />
-                    Administrator
-                  </label>
-                </div>
-              </div>
-              
-            </div>
-        </div>
-
-        <br/>
-
-        <div class="container">
-          <div class="row">
-            <div class="col-sm">
-              <input type="text" class="form-control" placeholder="First Name" value="" />
-            </div>
-            <div class="col-sm">
-              <input type="text" class="form-control" placeholder="Last Name" value="" />
-            </div>
-          </div>
-          <br />
-          <div class="row">
-            <div class="col-sm">
-              <input type="text" class="form-control" placeholder="Email" value="" />
-            </div>
-          </div>
-
-        </div>
-
-        <br />
-        
-        <div class="container">
-          <div class="text-center">
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1" />
-              <label class="form-check-label" for="inlineRadio1" style="color: green">Activated</label>
-            </div>
-  
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2" />
-              <label class="form-check-label" for="inlineRadio2" style="color: red">Deactivated</label>
-            </div>
-          </div>
-        </div>
-
-        <br />
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">
-            Close
-          </button>
-          <button type="Submit" class="btn btn-primary">
-            Save changes
-          </button>
-        </div>
-        </form>
-      </div>
-    </div>
-  </div>
 </div>
-</div>
+
 {% endblock %}

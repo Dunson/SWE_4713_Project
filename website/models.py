@@ -1,4 +1,5 @@
-from werkzeug.security import generate_password_hash
+from werkzeug.datastructures import _CacheControl
+from werkzeug.security import generate_password_hash, check_password_hash
 from . import db 
 from flask_login import UserMixin
 from sqlalchemy.sql import func
@@ -6,7 +7,7 @@ from time import time
 import os
 import jwt
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 
@@ -24,12 +25,11 @@ class User(db.Model, UserMixin):
     hasMan = db.Column(db.Boolean, default = False)
     status = db.Column(db.Boolean, default = False)
     creationDate = db.Column(db.Date())
-    
-    
 
-
+    
 
     def reset_password(self, password, commit=False):
+        self.oldPassword = self.password
         self.password = generate_password_hash(password, method='sha256')
 
         if commit:
@@ -69,4 +69,10 @@ class User(db.Model, UserMixin):
 
         return password_ok
 
-
+"""
+def password_expire():
+    # put DB column here. SELECT password_exp FROM tablename WHERE id = userID\
+    password_origin = datetime.now() + timedelta(days=365)
+    password_exp = datetime.now()
+    password_notification = password_origin - timedelta(days=3)
+"""

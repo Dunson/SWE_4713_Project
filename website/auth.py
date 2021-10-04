@@ -1,4 +1,6 @@
+from os import error
 from flask import Blueprint, render_template, request, flash, redirect, url_for
+from sqlalchemy.orm import query
 from .models import User
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
@@ -32,6 +34,8 @@ def login():
             if check_password_hash(user.password, password):
                 flash('Login Succeful!', category='success')
                 login_user(user)
+       #         if user.password_expire():
+        #            flash('Your password will expire in 3 days')
                 return redirect(url_for('views.home'))
             else:
                 flash('Incorrect Password!', category='error')
@@ -128,15 +132,20 @@ def reset_password(token):
     user = User.verify_reset_token(token)
 
     if not user:
-        print('no user found')
         flash('Reset Token Expired!',category='error')
         return redirect(url_for('auth.login'))
 
     password1 = request.form.get('password1')
     password2 = request.form.get('password2')
-    
+
     if password1:
         if password1 == password2:
+            print(check_password_hash(user.oldPassword, password1))
+
+            if check_password_hash(user.oldPassword, password1):
+                flash('You can not reuse an old password!', category='error')
+                return redirect(url_for('auth.reset_password', token = token))
+
             user.reset_password(password1, commit=True)
             flash('Password Reset Successful!!', category='success')
             return redirect(url_for('auth.login'))
@@ -146,24 +155,36 @@ def reset_password(token):
     return render_template('reset_verified.html', user=current_user)   
 
 
-#Method for admin portal access and updating user info on POST request
+
+
+#Method for admin dashboard
 @auth.route('/adminPortal', methods = ['GET', 'POST'])
 @login_required
 def adminPort():
 
+    #qID = 0
     #Logic for updating accounts
     if request.method == 'POST':
-        print('POST Request')
-
+        searchID = request.form.get('searchBar')
+        print(searchID)
+        return render_template('editAccount.html', user=current_user, query = User.query.all())
 
     
-    if current_user.hasAdmin:
-        return render_template('adminPortal.html', 
-            user = current_user, query = User.query.all(), selUser = current_user)
     else:
-        flash('You do not have access to this page!', category='error')
-        return redirect(url_for('views.home'))
+
+        if current_user.hasAdmin:
+            return render_template('adminPortal.html', 
+                user = current_user, query = User.query.all())
+        else:
+            flash('You do not have access to this page!', category='error')
+            return redirect(url_for('views.home'))
 
 
-    
+@auth.route('editAccount')
+@login_required
+def accountEdit():
 
+    if request.method == 'POST':
+        pass
+
+    return render_template('editAccount.html', user=current_user, query = User.query.all())

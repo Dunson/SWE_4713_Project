@@ -44,7 +44,7 @@ def login():
     return render_template("login.html", user = current_user)
 
 
-@auth.route('accounting/logout')
+@auth.route('/logout')
 @login_required
 def logout():
     logout_user()
@@ -107,7 +107,7 @@ def sign_up():
     return render_template("signUp.html", user = current_user)
 
 
-@auth.route('/accounting/recovery', methods = ['GET', 'POST'])
+@auth.route('/recovery', methods = ['GET', 'POST'])
 def recovery_Page():
     if request.method == 'POST':
         email = request.form.get('email')
@@ -125,7 +125,7 @@ def recovery_Page():
 
 
 
-@auth.route('/accounting/reset_verified/<token>', methods = ['GET', 'POST'])
+@auth.route('/reset_verified/<token>', methods = ['GET', 'POST'])
 def reset_password(token):
 
     user = User.verify_reset_token(token)
@@ -157,7 +157,7 @@ def reset_password(token):
 
 
 #Method for admin dashboard
-@auth.route('/accounting/adminPortal', methods = ['GET', 'POST'])
+@auth.route('/adminPortal', methods = ['GET', 'POST'])
 @login_required
 def adminPort():
 
@@ -179,7 +179,7 @@ def adminPort():
             return redirect(url_for('views.home'))
 
 
-@auth.route('/accounting/editAccount')
+@auth.route('/editAccount')
 @login_required
 def accountEdit():
 

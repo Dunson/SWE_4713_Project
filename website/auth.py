@@ -34,8 +34,7 @@ def login():
             if check_password_hash(user.password, password):
                 flash('Login Succeful!', category='success')
                 login_user(user)
-       #         if user.password_expire():
-        #            flash('Your password will expire in 3 days')
+       
                 return redirect(url_for('views.home'))
             else:
                 flash('Incorrect Password!', category='error')
@@ -45,7 +44,7 @@ def login():
     return render_template("login.html", user = current_user)
 
 
-@auth.route('/logout')
+@auth.route('accounting/logout')
 @login_required
 def logout():
     logout_user()
@@ -108,7 +107,7 @@ def sign_up():
     return render_template("signUp.html", user = current_user)
 
 
-@auth.route('/recovery', methods = ['GET', 'POST'])
+@auth.route('/accounting/recovery', methods = ['GET', 'POST'])
 def recovery_Page():
     if request.method == 'POST':
         email = request.form.get('email')
@@ -126,7 +125,7 @@ def recovery_Page():
 
 
 
-@auth.route('/reset_verified/<token>', methods = ['GET', 'POST'])
+@auth.route('/accounting/reset_verified/<token>', methods = ['GET', 'POST'])
 def reset_password(token):
 
     user = User.verify_reset_token(token)
@@ -158,7 +157,7 @@ def reset_password(token):
 
 
 #Method for admin dashboard
-@auth.route('/adminPortal', methods = ['GET', 'POST'])
+@auth.route('/accounting/adminPortal', methods = ['GET', 'POST'])
 @login_required
 def adminPort():
 
@@ -180,7 +179,7 @@ def adminPort():
             return redirect(url_for('views.home'))
 
 
-@auth.route('editAccount')
+@auth.route('/accounting/editAccount')
 @login_required
 def accountEdit():
 

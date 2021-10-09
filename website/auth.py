@@ -10,6 +10,9 @@ from datetime import datetime
 
 auth = Blueprint('auth', __name__)
 
+searchID = 'none'
+
+
 #Back-end for logging in
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -164,9 +167,13 @@ def adminPort():
     #qID = 0
     #Logic for updating accounts
     if request.method == 'POST':
+        global searchID
         searchID = request.form.get('searchBar')
-        print(searchID)
-        return render_template('editAccount.html', user=current_user, query = User.query.all())
+        if len(searchID) < 1:
+            flash('Search field can not be blank.', category='error')
+            return redirect(url_for('auth.adminPort'))
+        else:
+            return redirect(url_for('auth.accountEdit'))
 
     
     else:
@@ -175,15 +182,61 @@ def adminPort():
             return render_template('adminPortal.html', 
                 user = current_user, query = User.query.all())
         else:
-            flash('You do not have access to this page!', category='error')
+            flash('You do not have access to this page.', category='error')
             return redirect(url_for('views.home'))
 
 
-@auth.route('/editAccount')
+@auth.route('/editAccount', methods = ['GET', 'POST'])
 @login_required
 def accountEdit():
 
-    if request.method == 'POST':
-        pass
+    usr_status = False
+    usr_hasMan = False
+    usr_hasAdmin = False
 
-    return render_template('editAccount.html', user=current_user, query = User.query.all())
+    qID = int(searchID)
+    user_to_update = User.query.filter_by(id = qID).first()
+
+    if request.method == 'POST':
+
+        email = request.form.get("email")
+        firstName = request.form.get("firstName")
+        lastName = request.form.get("lastName")
+        status = request.form.get("activeButton")
+        hasMan = request.form.get("manButton")
+        hasAdmin = request.form.get("adminButton")
+
+        if status == 'on':
+            usr_status = True
+        if hasMan == 'on':
+            usr_hasMan = True
+        if hasAdmin == 'on':
+            usr_hasAdmin = True
+
+        userName = userNameGenGlobal(firstName, lastName)
+        if len(firstName) < 2 or len(lastName) < 2 or len(email) < 1:
+            flash('Input fields can not be blank.', category='error')
+        else:
+            
+            updateStat = user_to_update.update_user(userName, email, firstName, lastName, usr_hasMan, usr_hasAdmin, usr_status, commit=True)
+            if updateStat:
+                flash('Account updated successfully', category='success')
+                return redirect(url_for('auth.adminPort'))
+            else:
+                flash('Account Update Failed!', category='error')
+        
+    
+    return render_template('editAccount.html', user=current_user, query = User.query.all(), searchID = searchID)
+
+
+def userNameGenGlobal(first, last):
+            first = first
+            last = last
+            currMonth = str(datetime.now().month)
+            currYear = str(datetime.now().year)
+
+            if len(currMonth) < 2:
+                currMonth = '0' + currMonth
+            
+            userName = first[0] + last + currMonth + currYear[2] + currYear[3]
+            return userName

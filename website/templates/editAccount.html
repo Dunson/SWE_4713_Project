@@ -3,7 +3,7 @@
 
 {%block content%}
 
-<h3 class="text-center">Edit Account for {{query[request.args.get('searchBar') | int - 1].firstName}} {{query[request.args.get('searchBar') | int - 1].lastName}}</h3>
+<h3 class="text-center">Edit Account for {{query[searchID | int - 1].firstName}} {{query[searchID | int - 1].lastName}}</h3>
 
 <form method = "POST">
 
@@ -16,7 +16,7 @@
               class="form-control"
               id="email"
               name="email"
-              value="{{query[request.args.get('searchBar') | int - 1].email}}"
+              value="{{query[searchID | int - 1].email}}"
             />
           </div>
       
@@ -29,7 +29,7 @@
                       class="form-control"
                       id="firstName"
                       name="firstName"
-                      value="{{query[request.args.get('searchBar') | int - 1].firstName}}"
+                      value="{{query[searchID | int - 1].firstName}}"
                     />
                 </div>
               </div>
@@ -41,7 +41,7 @@
                       class="form-control"
                       id="lastName"
                       name="lastName"
-                      value="{{query[request.args.get('searchBar') | int - 1].lastName}}"
+                      value="{{query[searchID | int - 1].lastName}}"
                     />
                   </div>
             </div>
@@ -50,29 +50,29 @@
         
             <div class="text-center">
                 <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="inlineRadioOptions" {% if query[request.args.get('searchBar') | int - 1].status  == True %} checked {% endif %}/>
-                  <label class="form-check-label" for="inlineRadio" style="color: green">Activated</label>
+                  <input name = "activeButton" class="form-check-input" type="radio" id="inlineRadioOptions1" onclick="fixActive(); return true;" {% if query[searchID | int - 1].status  == True %} checked {% endif %}/>
+                  <label class="form-check-label" for="inlineRadio" style="color: green" >Activated</label>
                 </div>
       
                 <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="inlineRadioOptions"  {% if query[request.args.get('searchBar') | int - 1].status  == False %} checked {% endif %}/>
-                  <label class="form-check-label" for="inlineRadio" style="color: red">Deactivated</label>
+                  <input class="form-check-input" type="radio" id="inlineRadioOptions2" onclick="fixDeactive(); return true;" {% if query[searchID | int - 1].status  == False %} checked {% endif %}/>
+                  <label class="form-check-label" for="inlineRadio" style="color: red" >Deactivated</label>
                 </div>
               </div>
         
               <div class="text-center">
                 <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="inlineRadioOptionUserType"  {% if query[request.args.get('searchBar') | int - 1].hasMan  == False and query[request.args.get('searchBar') | int - 1].hasAdmin  == False %} checked {% endif %}/>
+                  <input name = "usrButton" class="form-check-input" type="radio" id="inlineRadioOptionsUserType1"  onclick="fixUsr(); return true;" {% if (query[searchID | int - 1].hasMan == False ) and (query[searchID | int - 1].hasAdmin == False) %} checked {% endif %}/>
                   <label class="form-check-label" for="inlineRadio" >User</label>
                 </div>
       
                 <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="inlineRadioOptionsUserType"  {% if query[request.args.get('searchBar') | int - 1].hasMan  == True %} checked {% endif %} />
+                  <input name = "manButton" class="form-check-input" type="radio" id="inlineRadioOptionsUserType2" onclick="fixMan(); return true;" {% if query[searchID | int - 1].hasMan  == True %} checked {% endif %} />
                   <label class="form-check-label" for="inlineRadio" >Manager</label>
                 </div>
     
                 <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="inlineRadioOptionsUserType"  {% if query[request.args.get('searchBar') | int - 1].hasAdmin  == True %} checked {% endif %} />
+                  <input name = "adminButton" class="form-check-input" type="radio" id="inlineRadioOptionsUserType3" onclick="fixAdmin(); return true;" {% if query[searchID | int - 1].hasAdmin  == True %} checked {% endif %} />
                   <label class="form-check-label" for="inlineRadio" >Admininstrator</label>
                 </div>
               </div>
@@ -90,7 +90,79 @@
 
 
 </form> 
+<script type="text/javascript">
+  
+  function fixActive()
+  {
+    var statusRadioOne = document.getElementById("inlineRadioOptions1");
+    var statusRadioTwo = document.getElementById("inlineRadioOptions2");
 
+  
+
+    if(statusRadioOne.checked == true)
+    {
+      statusRadioTwo.checked = false;
+    }
+  }
+
+
+
+  function fixDeactive()
+  {
+    var statusRadioOne = document.getElementById("inlineRadioOptions1");
+    var statusRadioTwo = document.getElementById("inlineRadioOptions2");
+
+    if (statusRadioTwo.checked == true)
+    {
+      statusRadioOne.checked = false;
+    }
+  }
+
+  function fixUsr()
+  {
+    var statusUsr = document.getElementById("inlineRadioOptionsUserType1");
+    var statusMan = document.getElementById("inlineRadioOptionsUserType2");
+    var statusAdmin = document.getElementById("inlineRadioOptionsUserType3");
+
+    if (statusUsr.checked == true)
+    {
+      statusMan.checked = false;
+      statusAdmin.checked = false;
+    }
+
+  }
+
+  function fixMan()
+  {
+    var statusUsr = document.getElementById("inlineRadioOptionsUserType1");
+    var statusMan = document.getElementById("inlineRadioOptionsUserType2");
+    var statusAdmin = document.getElementById("inlineRadioOptionsUserType3");
+
+
+    if (statusMan.checked == true)
+    {
+      statusUsr.checked = false;
+      statusAdmin.checked = false;
+    }
+  }
+
+  function fixAdmin()
+  {
+    var statusUsr = document.getElementById("inlineRadioOptionsUserType1");
+    var statusMan = document.getElementById("inlineRadioOptionsUserType2");
+    var statusAdmin = document.getElementById("inlineRadioOptionsUserType3");
+
+
+    if (statusAdmin.checked == true)
+    {
+      statusMan.checked = false;
+      statusUsr.checked = false;
+    }
+  }
+
+
+
+</script>
 
 
 

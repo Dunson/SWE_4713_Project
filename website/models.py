@@ -69,6 +69,28 @@ class User(db.Model, UserMixin):
 
         return password_ok
 
+    def update_user(self, usrName, usrEmail, usrFirst, usrLast, usrMan, usrAdmin, usrStat, commit=False):
+    
+        self.firstName = usrFirst
+        self.lastName = usrLast 
+        self.email = usrEmail
+        self.hasMan = usrMan
+        self.hasAdmin = usrAdmin
+        self.status = usrStat
+        self.userName = usrName
+
+        if commit:
+            db.session.commit()
+            return True
+
+
+
+
+
+
+
+
+
 """
 def password_expire():
     # put DB column here. SELECT password_exp FROM tablename WHERE id = userID\

@@ -1,0 +1,65 @@
+{% extends "base.html" %} 
+{% block title %} New Account {% endblock %}
+
+{%block content%}
+
+<br>
+<div class="container-fluid bg-dark text-light pb-2" style="max-width: 500px; max-height: auto;">
+    
+    <form method="POST">    
+        <h2 class="text-center">Account Creation</h2>
+        
+        <div class="form-row">
+            <div class="form-group col-mb-6">
+                <label for="acc_name">Account Name</label>
+                <input type="text" class="form-control" id="acc_name" name = "acc_name" placeholder="Name">
+            </div> 
+            <div class="form-group col-mb-6 ml-auto">
+                <label for="acc_cat">Type</label>
+                <select class="form-control" id="acc_cat_selection" name="acc_cat">
+                    <option selected>Select...</option>
+                    <option>Assets</option>
+                    <option>Expenses</option>
+                    <option>Liabilities</option>
+                    <option>Equity</option>
+                    <option>Revenue (income)</option>
+                    <option>Other</option>
+                </select>
+            </div> 
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group col-12">
+                <label for="acc_desc">Description</label>
+                <textarea class="form-control" aria-label="With textarea" placeholder="Type here..." name="acc_desc"></textarea>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-6">
+                <label for="init_bal">Initial Balance</label>
+                <input type="number" class="form-control" id="init_bal_form" placeholder="0.00" step=".01" name="init_bal">
+            </div>
+
+            <div class="form-group col-mb-6 ml-auto">
+                <label for="acc_statement">Statement</label>
+                <select class="form-control" id="acc_statement_sel" name="acc_statement">
+                    <option selected>Select...</option>
+                    <option>Balance Sheet</option>
+                    <option>Income Statement</option>
+                    <option>Cash Flow Statement</option>
+                    <option>Shareholder's Equity</option>
+                </select>
+            </div> 
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-success">Add Account</button>
+        </div>
+
+    </form>
+
+</div>
+
+
+{% endblock %}

@@ -25,14 +25,11 @@ content%}
   }
 </style>
 
-<div class="container-fluid bg-dark px-3 py-1 pb-5" >
-  <h2 class="text-center text-light">Accounts</h2>
-
-
+<div class="container-fluid bg-dark px-3 py-1 pb-4">
   
     <form class="form-inline" method="POST">
-      
-          
+      <h2 class="text-light pt-2">User Accounts</h2>
+        <div class="ml-auto">
           <input type="search" name="searchBar" class="form-control pr-1" placeholder="Search by ID#"
             list = "userData" />
           
@@ -41,17 +38,15 @@ content%}
               <option name="userIndex" value="{{query[loop.index - 1].id}}">{{user.id}}</option>
               {% endfor %}
             </datalist>  
-
-            <button class="btn btn-success" type="submit">Edit</button>
-            
-       
+            <button class="btn btn-success" type="submit">Search</button>
+        </div>  
     </form>
 
   <br>
 
 
 
-  <div style="overflow: scroll; max-height: 220px">
+  <div style="overflow: scroll; max-height: 300px">
     <table>
       <tr style="
           position: sticky;
@@ -97,7 +92,7 @@ content%}
     </table>
   </div>
 
-  
+  <br>
 
 </div>
 

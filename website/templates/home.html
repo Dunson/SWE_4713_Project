@@ -2,5 +2,16 @@
 {% block title %} Home {% endblock %}
 
 {%block content%}
+<style>
+    div.a {
+  position: absolute;
+  left: 0;
+  top: 100px;
+}
+</style>
+<div class="a">
+    <iframe src="https://calendar.google.com/calendar/embed?height=500&wkst=1&bgcolor=%23ffffff&ctz=America%2FNew_York&title=Account%20Calander&showTitle=0&showNav=0&showPrint=0&showTabs=0&showCalendars=0&src=aGo0aDBzYnVza3BxcmtwcjhncG91dG9qczhAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&color=%23F4511E" style="border-width:0" width="500" height="500" frameborder="0" scrolling="no"></iframe>
+</div>
+
 <h1 class = "text-center"> Welcome, {{current_user.firstName}}.</h1>
 {% endblock %}

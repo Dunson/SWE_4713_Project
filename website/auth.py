@@ -266,3 +266,8 @@ def userNameGenGlobal(first, last):
 
     userName = first[0] + last + currMonth + currYear[2] + currYear[3]
     return userName
+
+@auth.route('/help')
+def help():
+    return render_template("help.html", user = current_user, query=User.query.all(), searchID=searchID,
+                        acc_query = Account.query.join(User).filter(Account.user_id==searchID))

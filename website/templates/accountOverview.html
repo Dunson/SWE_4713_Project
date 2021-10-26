@@ -3,9 +3,9 @@
 
 {%block content%}
 <br>
-<div class="containter-fluid bg-dark pb-3 pl-3 pr-3" style="position: relative; right: 350px; width: 250px">
-    <h3 class="text-center text-light">User Information</h3>
-    <div class="text-light pl-2">
+<div class="containter-fluid pb-3 pl-3 pr-3" style="position: absolute; left: 50px;">
+    <h3 class="text-center text-dark">User Information</h3>
+    <div class=" container bg-dark text-light pl-2">
       <p>Name: {{query[searchID | int - 1].firstName}}  {{query[searchID | int - 1].lastName}}
         <br> 
         Email: {{query[searchID | int - 1].email}}
@@ -129,10 +129,22 @@
     
 </div>
 
-<div class="container text-light pb-2" style="position: relative; bottom: 207px; max-height: 600px;">
+<div class="container text-light pb-2" style="">
+  <form class ="form-inline" method="POST">
   <h2 class="text-dark">Chart of Accounts</h2>
-
-  <div style="overflow: scroll;">
+    <div class="ml-auto">
+      <input type="search" name="searchBar" class="form-control pr-1" placeholder="Account ID#"
+        list = "userData" />
+      
+        <datalist id="userData"> 
+          {% for account in acc_query %}
+          <option name="accountIndex" >{{account.acc_num}}</option>
+          {% endfor %}
+        </datalist>  
+        <button class="btn btn-success" type="submit">View</button>
+    </div>  
+  </form>
+  <div>
     <table class="table table-striped table-dark">
       <thead>
         <tr>
@@ -143,16 +155,17 @@
           <th scope="col">Statement</th>
         </tr>
       </thead>
-
+      <tbody style="overflow-y: scroll;">
         {% for account in acc_query %}
-        <tr>
-          <td>{{account.acc_num}}</td>
+        <tr id="rowz">
+          <td><a style="color: white;" href="">{{account.acc_num}}</a></td>
           <td>{{account.acc_name}}</td>
           <td>{{account.acc_desc}}</td>
           <td>{{account.acc_cat}}</td>
           <td>{{account.acc_statement}}</td>
         </tr>
         {% endfor %}
+      </tbody>
     </table>
   </div>
 

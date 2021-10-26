@@ -11,8 +11,9 @@ from datetime import datetime
 
 auth = Blueprint('auth', __name__)
 
-searchID = 'none'
+SEARCHID = 'none'
 
+ACC_ID = 'none'
 
 # Back-end for logging in
 @auth.route('/login', methods=['GET', 'POST'])
@@ -62,18 +63,18 @@ def sign_up():
         email = request.form.get('email')
         firstName = request.form.get('firstName')
         lastName = request.form.get('lastName')
-        password1 = request.form.get('password1')
-        password2 = request.form.get('password2')
+        password_one = request.form.get('password1')
+        password_two = request.form.get('password2')
 
         user = User.query.filter_by(email=email).first()
-        pwd_check = User.password_check(password1)
+        pwd_check = User.password_check(password_one)
 
         # Creation validation logic
         if user:
             flash('An account with that email already exists!', category='error')
         elif len(firstName) < 2:
             flash('First name must be greater than 1 character', category='error')
-        elif password1 != password2:  # This compares the two passwords
+        elif password_one != password_two:  # This compares the two passwords
             flash('Passwords do not match', category='error')
         elif not pwd_check:
             flash('Password does not meet the requirements', category='error')
@@ -81,7 +82,7 @@ def sign_up():
             # Add user to database
             new_user = User(email=email, firstName=firstName, lastName=lastName,
                             password=generate_password_hash(
-                                password1, method='sha256'),
+                                password_one, method='sha256'),
                             userName=userNameGenGlobal(firstName, lastName),
                             hasAdmin=False, hasMan=False, status=False,
                             creationDate=datetime.now())
@@ -149,9 +150,9 @@ def adminPort():
     #qID = 0
     # Logic for updating accounts
     if request.method == 'POST':
-        global searchID
-        searchID = request.form.get('searchBar')
-        if len(searchID) < 1:
+        global SEARCHID
+        SEARCHID = request.form.get('searchBar')
+        if len(SEARCHID) < 1:
             flash('Search field can not be blank.', category='error')
             return redirect(url_for('auth.adminPort'))
         else:
@@ -179,47 +180,58 @@ def accountOverview():
         usr_hasMan = False
         usr_hasAdmin = False
 
-        qID = int(searchID)
+        qID = int(SEARCHID)
         user_to_update = User.query.filter_by(id=qID).first()
 
         if request.method == 'POST':
 
-            email = request.form.get("email")
-            firstName = request.form.get("firstName")
-            lastName = request.form.get("lastName")
-            status = request.form.get("activeButton")
-            hasMan = request.form.get("manButton")
-            hasAdmin = request.form.get("adminButton")
+            try:
+                email = request.form.get("email")
+                firstName = request.form.get("firstName")
+                lastName = request.form.get("lastName")
+                status = request.form.get("activeButton")
+                hasMan = request.form.get("manButton")
+                hasAdmin = request.form.get("adminButton")
 
-            if status == 'on':
-                usr_status = True
-            if hasMan == 'on':
-                usr_hasMan = True
-            if hasAdmin == 'on':
-                usr_hasAdmin = True
+                if status == 'on':
+                    usr_status = True
+                if hasMan == 'on':
+                    usr_hasMan = True
+                if hasAdmin == 'on':
+                    usr_hasAdmin = True
 
-            if len(firstName) < 2 or len(lastName) < 2 or len(email) < 1:
-                flash('Input fields can not be blank.', category='error')
-                return redirect(url_for('auth.accountOverview'))
-            else:
-                userName = userNameGenGlobal(firstName, lastName)
+                if len(firstName) < 2 or len(lastName) < 2 or len(email) < 1:
+                    flash('Input fields can not be blank.', category='error')
+                    return redirect(url_for('auth.accountOverview'))
+                else:
+                    userName = userNameGenGlobal(firstName, lastName)
 
-                updateStat = user_to_update.update_user(
-                                userName, email, firstName, 
-                                lastName, usr_hasMan, usr_hasAdmin, 
-                                usr_status, commit=True)
-            if updateStat:
-                flash('Account updated successfully', category='success')
-                return redirect(url_for('auth.accountOverview'))
-            else:
-                flash('Account Update Failed!', category='error')
+                    updateStat = user_to_update.update_user(
+                                    userName, email, firstName, 
+                                    lastName, usr_hasMan, usr_hasAdmin, 
+                                    usr_status, commit=True)
+
+                if updateStat:
+                    flash('Account updated successfully', category='success')
+                    return redirect(url_for('auth.accountOverview'))
+                else:
+                    flash('Account Update Failed!', category='error')
+                    
+            #Using exception handling to determine the difference in POST requests. If a better alternative exists. Change ASAP
+            except TypeError as err:
+                #flash("TypeError: {0}".format(err), category='error')
+                #return redirect(url_for('auth.accountOverview'))
+                global ACC_ID
+                ACC_ID = request.form.get('searchBar')
+                return redirect(url_for('auth.view_account'))
+
     else:
         flash('You do not have access to this page.', category='error')
         return redirect(url_for('views.home'))    
 
     return render_template('accountOverview.html', user=current_user, 
-                        query=User.query.all(), searchID=searchID, 
-                        acc_query = Account.query.join(User).filter(Account.user_id==searchID))
+                        query=User.query.all(), searchID=SEARCHID, 
+                        acc_query = Account.query.join(User).filter(Account.user_id==SEARCHID))
 
 
 #FORMAT monetary values to only use 2 decimal places by: 
@@ -229,9 +241,8 @@ def accountOverview():
 def newChart():
 
 
-    qID = int(searchID)
+    qID = int(SEARCHID)
     
-
     if request.method == 'POST':
         acc_name = request.form.get('acc_name')
         acc_cat = request.form.get('acc_cat')
@@ -242,7 +253,7 @@ def newChart():
         new_acc = Account(acc_name = acc_name, acc_cat = acc_cat, 
                             acc_desc = acc_desc, init_bal = init_bal,
                             acc_statement = acc_statement, 
-                            user_id = qID)
+                            user_id = qID, acc_bal = init_bal)
         
         db.session.add(new_acc)
         db.session.commit()
@@ -251,9 +262,20 @@ def newChart():
 
     return render_template('newAccount.html', user = current_user, 
                         query = User.query.all(), 
-                        searchID = searchID)
+                        searchID = SEARCHID)
 
 
+
+@auth.route('/viewAccount', methods = ['GET', 'POST'])
+@login_required
+def view_account():
+
+    #Display ledger for the account
+
+
+
+    return render_template('accountView.html', user = current_user, acc_ID = ACC_ID, 
+                        acc_query = Account.query.join(User).filter(Account.user_id==SEARCHID))
 
 
 #Username generator

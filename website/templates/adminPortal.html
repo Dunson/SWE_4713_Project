@@ -2,33 +2,12 @@
 content%}
 <h1 class="text-center">Admin Dashboard</h1>
 <br />
-<style>
-  table {
-    font-family: arial, sans-serif;
-    border-collapse: collapse;
-    width: 100%;
-  }
 
-  td,
-  th {
-    border: 1px solid #dddddd;
-    text-align: left;
-    padding: 8px;
-  }
 
-  tr:nth-child(even) {
-    background-color: #dddddd;
-  }
-
-  tr:nth-child(odd) {
-    background-color: white;
-  }
-</style>
-
-<div class="container-fluid bg-dark px-3 py-1 pb-4">
+<div class="container-fluid px-3 py-1 pb-4">
   
     <form class="form-inline" method="POST">
-      <h2 class="text-light pt-2">User Accounts</h2>
+      <h2 class="text-dark pt-2">User Accounts</h2>
         <div class="ml-auto">
           <input type="search" name="searchBar" class="form-control pr-1" placeholder="Search by ID#"
             list = "userData" />
@@ -42,53 +21,48 @@ content%}
         </div>  
     </form>
 
-  <br>
+  <div>
+    <table class="table table-striped table-dark">
+      <thead style="position: sticky;">
+        <tr>
+          <th>ID#:</th>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Email</th>
+          <th>Username</th>
+          <th>Type</th>
+          <th>Date Created</th>
+          <th>Status</th>
+        </tr>
+      </thead>
 
-
-
-  <div style="overflow: scroll; max-height: 300px">
-    <table>
-      <tr style="
-          position: sticky;
-          top: 0;
-          background-color: darkgrey;
-          color: white;
-        ">
-        <th>ID#:</th>
-        <th>First Name</th>
-        <th>Last Name</th>
-        <th>Email</th>
-        <th>Username</th>
-        <th>Type</th>
-        <th>Date Created</th>
-        <th>Status</th>
-      </tr>
-
-      {% for user in query %}
-      <tr>
-        <td>{{user.id}}</td>
-        <td>{{user.firstName}}</td>
-        <td>{{user.lastName}}</td>
-        <td>{{user.email}}</td>
-        <td>{{user.userName}}</td>
-
-        {% if user.hasAdmin%}
-        <td>Administrator</td>
-        {% elif user.hasMan %}
-        <td>Manager</td>
-        {% else %}
-        <td>User</td>
-        {% endif %}
-
-        <td>{{user.creationDate}}</td>
-
-        {% if user.status %}
-        <td style="color: green">Activated</td>
-        {% else %}
-        <td style="color: red">Deactivated</td>
-        {% endif %}
-      </tr>
-      {% endfor %}
+      <tbody style="overflow-y: scroll;">
+        {% for user in query %}
+        <tr>
+          <td>{{user.id}}</td>
+          <td>{{user.firstName}}</td>
+          <td>{{user.lastName}}</td>
+          <td>{{user.email}}</td>
+          <td>{{user.userName}}</td>
+  
+          {% if user.hasAdmin%}
+          <td>Administrator</td>
+          {% elif user.hasMan %}
+          <td>Manager</td>
+          {% else %}
+          <td>User</td>
+          {% endif %}
+  
+          <td>{{user.creationDate}}</td>
+  
+          {% if user.status %}
+          <td style="color: green">Activated</td>
+          {% else %}
+          <td style="color: red">Deactivated</td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
   </div>
 

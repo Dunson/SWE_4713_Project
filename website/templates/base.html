@@ -54,12 +54,12 @@
                     
                 </style>
 
+                {% if user.hasAdmin %}
                 <li class = "nav-item">
-                    {% if user.hasAdmin %}
-                        <a class = "nav-link text-light text-center" id = "adminPort" href="/adminPortal">System Overview</a>
-                    {% endif %}
+                    <a class = "nav-link text-light text-center" id = "adminPort" href="/adminPortal">Admin Dashboard</a>
                 </li>
-                
+                {% endif %}
+
                 <li class="nav-item dropdown">
                     
                     <a class = "nav-link dropdown-toggle text-light text-center" id = "" data-toggle = "dropdown" aria-haspopup="true" aria-expanded="false">  
@@ -124,7 +124,7 @@
 </body>
 
 <div class="footer" style="background-color: lightgray;">
-    <a href="/help"><button class="btn btn-primary">Need Help? Click Here!</button></a>
+    <a href="/help" class="btn btn-primary">Need Help? Click Here!</a>
 </div>
 
 </html>

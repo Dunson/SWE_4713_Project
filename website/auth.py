@@ -1,8 +1,7 @@
 from os import error
-#from typing_extensions import Required
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from sqlalchemy.orm import query
-from .models import User, Account
+from .models import User, Account, Ledger
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
 from flask_login import login_user, login_required, logout_user, current_user
@@ -11,11 +10,11 @@ from datetime import datetime
 
 auth = Blueprint('auth', __name__)
 
+#GLOBAL Variables
 SEARCHID = 'none'
-
 ACC_ID = 'none'
 
-# Back-end for logging in
+
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -253,7 +252,7 @@ def newChart():
         new_acc = Account(acc_name = acc_name, acc_cat = acc_cat, 
                             acc_desc = acc_desc, init_bal = init_bal,
                             acc_statement = acc_statement, 
-                            user_id = qID, acc_bal = init_bal)
+                            user_id = qID)
         
         db.session.add(new_acc)
         db.session.commit()
@@ -273,9 +272,9 @@ def view_account():
     #Display ledger for the account
 
 
-
     return render_template('accountView.html', user = current_user, acc_ID = ACC_ID, 
-                        acc_query = Account.query.join(User).filter(Account.user_id==SEARCHID))
+                        acc_query = Account.query.join(User).filter(Account.user_id==SEARCHID),
+                        led_query = Ledger.query.join(Account).filter(Ledger.acc_num==ACC_ID))
 
 
 #Username generator
@@ -291,5 +290,22 @@ def userNameGenGlobal(first, last):
 
 @auth.route('/help')
 def help():
-    return render_template("help.html", user = current_user, query=User.query.all(), searchID=SEARCHID,
-                        acc_query = Account.query.join(User).filter(Account.user_id==SEARCHID))
+    return render_template("help.html", user = current_user)
+
+
+#NEEDS WORK - ROUTING ACCOUNTS TO LEDGER 
+
+@auth.route('/account_ledger', methods = ['GET', 'POST'])
+@login_required
+def account_ledger():
+    
+   
+
+    return render_template('acc_ledger.html', user = current_user, 
+                            led_query = Ledger.query.join(Account).filter(Ledger.acc_num==ACC_ID))
+    
+
+
+    
+    
+

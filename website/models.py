@@ -101,20 +101,33 @@ class Account(db.Model):
     acc_name = db.Column(db.String(150), unique = True)
     acc_desc = db.Column(db.String(150))
     acc_cat = db.Column(db.String(150))
-    acc_sub_cat = db.Column(db.String(150))
+    #acc_sub_cat = db.Column(db.String(150))
    
     init_bal = db.Column(db.Float)
-    acc_bal = db.Column(db.Float)
-    acc_deb = db.Column(db.Float)
-    acc_cred = db.Column(db.Float)
+    #acc_bal = db.Column(db.Float)
+    #acc_deb = db.Column(db.Float)
+    #acc_cred = db.Column(db.Float)
 
     acc_statement = db.Column(db.String(150))
-    acc_order = db.Column(db.Integer)
+    #acc_order = db.Column(db.Integer)
 
-    creation_date = db.Column(db.Date())
-    creation_time = db.Column(db.Time(), nullable = False)
+    #creation_date = db.Column(db.Date())
+    #creation_time = db.Column(db.Time(), nullable = False)
 
-    acc_status = db.Column(db.Boolean, default = False)
-    acc_comment = db.Column(db.String(150))
+    #acc_status = db.Column(db.Boolean, default = False)
+    #acc_comment = db.Column(db.String(150))
 
+
+
+class Ledger(db.Model):
+
+    entry_num = db.Column(db.Integer, primary_key = True)
+    acc_num = db.Column(db.Integer, db.ForeignKey('account.acc_num'), nullable = False)
+
+    entry_desc = db.Column(db.String(150))
+
+    entry_date = db.Column(db.Date())
     
+    entry_bal = db.Column(db.Float)
+    entry_cred = db.Column(db.Float)
+    entry_deb = db.Column(db.Float)

@@ -3,7 +3,7 @@
 
 {%block content%}
 <br>
-<div class="containter-fluid pb-3 pl-3 pr-3" style="position: absolute; left: 50px;">
+<div class="container pb-3 pl-3 pr-3" style="position: absolute; left: 10px; top: 100px; width: 250px; height: 50px;">
     <h3 class="text-center text-dark">User Information</h3>
     <div class=" container bg-dark text-light pl-2">
       <p>Name: {{query[searchID | int - 1].firstName}}  {{query[searchID | int - 1].lastName}}
@@ -129,7 +129,7 @@
     
 </div>
 
-<div class="container text-light pb-2" style="">
+<div class="container text-light pb-2" style="position: absolute; top: 100px; width: 1100px;">
   <form class ="form-inline" method="POST">
   <h2 class="text-dark">Chart of Accounts</h2>
     <div class="ml-auto">

@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
 from flask_login import login_user, login_required, logout_user, current_user
 from .email import send_recovery
-from datetime import datetime
+from datetime import datetime, timedelta
 
 auth = Blueprint('auth', __name__)
 
@@ -83,7 +83,7 @@ def sign_up():
                                 password_one, method='sha256'),
                             userName=userNameGenGlobal(firstName, lastName),
                             hasAdmin=False, hasMan=False, status=False,
-                            creationDate=datetime.now())
+                            creationDate=datetime.now(), expDate=datetime.now() + timedelta(days=365))
 
             db.session.add(new_user)
             db.session.commit()

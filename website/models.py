@@ -1,6 +1,8 @@
 from sqlalchemy.orm import backref
-# from werkzeug.datastructures import _CacheControl
+
+from werkzeug.datastructures import _CacheControl
 from werkzeug.security import generate_password_hash, check_password_hash
+
 from . import db 
 from flask_login import UserMixin
 from sqlalchemy.sql import func
@@ -50,8 +52,10 @@ class User(db.Model, UserMixin):
             return
         return User.query.filter_by(email=email).first()
 
+
     # Method for password validation
-    def password_check(self, password, passwd2):
+    def password_check(self, password, passwd2): 
+
         length_error = len(password) < 8
         digit_error = re.search(r"\d", password) is None
         uppercase_error = re.search(r"[A-Z]", password) is None
@@ -78,6 +82,7 @@ class User(db.Model, UserMixin):
         return password_exp
 
     def notify_password_exp(self):
+
         '''Report:
         Get Username, email and expDate if datetime.now >= password_expire() '''
         if self.hasAdmin and datetime.now() == self.password_expire() - timedelta(days=3):
@@ -94,6 +99,7 @@ class CannotBeDeactivatedError:
 class Account(db.Model):
     
     acc_num = db.Column(db.Integer, primary_key=True)  # unique identifier. Needs adjusting
+
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     acc_name = db.Column(db.String(150), unique=True)

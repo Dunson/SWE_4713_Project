@@ -14,7 +14,6 @@ auth = Blueprint('auth', __name__)
 SEARCHID = 'none'
 ACC_ID = 'none'
 
-
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -269,7 +268,18 @@ def newChart():
 @login_required
 def view_account():
 
-    #Display ledger for the account
+    #POST request to add entry into ledger--
+
+    if request.method == 'POST':
+        entry_desc = request.form.get('entry_desc')
+        entry_cred = request.form.get('entry_cred')
+        entry_deb = request.form.get('entry_deb')
+
+        new_entry = Ledger(entry_date=datetime.now(), entry_desc=entry_desc, entry_cred=entry_cred, entry_deb=entry_deb)
+
+        return redirect(url_for('auth.view_account'))
+
+
 
 
     return render_template('accountView.html', user = current_user, acc_ID = ACC_ID, 
@@ -292,7 +302,8 @@ def userNameGenGlobal(first, last):
 def help():
     return render_template("help.html", user = current_user)
 
-
+#May not need this method
+"""
 #NEEDS WORK - ROUTING ACCOUNTS TO LEDGER 
 
 @auth.route('/account_ledger', methods = ['GET', 'POST'])
@@ -302,9 +313,8 @@ def account_ledger():
    
 
     return render_template('acc_ledger.html', user = current_user, 
-                            led_query = Ledger.query.join(Account).filter(Ledger.acc_num==ACC_ID))
-    
-
+                            led_query = Ledger.query.join(Account).filter(Ledger.acc_num==ACC_ID)) 
+"""
 
     
     

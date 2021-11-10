@@ -1,6 +1,6 @@
 from sqlalchemy.orm import backref
 from werkzeug.datastructures import _CacheControl
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 from . import db 
 from flask_login import UserMixin
 from sqlalchemy.sql import func
@@ -52,8 +52,8 @@ class User(db.Model, UserMixin):
         return User.query.filter_by(email=email).first()
 
 
-    #Method for password validation
-    #This method was supplied by: 
+    # Method for password validation
+    # This method was supplied by: 
     def password_check(password, passwd2):
         
         length_error = len(password) < 8
@@ -85,20 +85,22 @@ class User(db.Model, UserMixin):
             db.session.commit()
             return True
 
-    """
-    def password_expire():
-        # put DB column here. SELECT password_exp FROM tablename WHERE id = userID
-        password_origin = datetime.now() + timedelta(days=365)
-        password_exp = datetime.now()
-        password_notification = password_origin - timedelta(days=3)
-    """
+    def password_expire(self):
+        password_exp = self.creationDate + timedelta(days=365)
+        return password_exp
+
+    def notify_password_exp(self):
+        if datetime.now() == self.password_expire() - timedelta(days=3):
+            return True
+
+
 
 class Account(db.Model):
     
     acc_num = db.Column(db.Integer, primary_key=True) #unique identifier. Needs adjusting
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-    acc_name = db.Column(db.String(150), unique = True)
+    acc_name = db.Column(db.String(150), unique=True)
     acc_desc = db.Column(db.String(150))
     acc_cat = db.Column(db.String(150))
     #acc_sub_cat = db.Column(db.String(150))

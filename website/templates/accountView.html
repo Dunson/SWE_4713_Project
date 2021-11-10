@@ -29,8 +29,74 @@
       </table>
 
       <div class="text-center">
-        <button class="btn btn-success" type="button">Add Entry</button>
+        <button class="btn btn-success" type="button" data-toggle="modal" data-target="#ledgermodal">Add Entry</button>
       </div>
+
+      <div class="modal fade" id="ledgermodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Add Entry</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              
+            <form method="POST">
+              <div class="row">
+                <div class="col">
+                  <div class="form-group">
+                    <label for="firstName">Debit Amount</label>
+                    <input
+                      type="number"
+                      step=".01"
+                      class="form-control"
+                      id="entry_deb"
+                      name="entry_deb"
+                    />
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="form-group">
+                    <label for="lastName">Credit Amount</label>
+                    <input
+                      type="number"
+                      step=".01"
+                      class="form-control"
+                      id="entry_cred"
+                      name="entry_cred"
+                    />
+                  </div>
+                </div>
+                </div>
+              <div class="row">
+                <div class="col">
+                  <label for="acc_desc">Description</label>
+                  <textarea
+                    type="text"
+                    class="form-control"
+                    id="entry_desc"
+                    name="entry_desc"
+                  ></textarea>
+                </div>
+              </div>
+
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-success">Add Entry</button>
+            </div>
+          </form>
+          </div>
+        </div>
+      </div>
+
+
+
+
+
+
 </div>
 
 

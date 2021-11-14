@@ -46,6 +46,9 @@ def login():
             else:
                 flash('Incorrect Password!', category='error')
                 count += 1
+                flash('You have exceeded maximum login attempts.', category='error')
+                return render_template('reset_verified.html', user=current_user)
+            
         else:
             flash('Required fields are empty!', category='error')
     return render_template("login.html", user=current_user)

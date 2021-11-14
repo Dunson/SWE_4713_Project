@@ -34,7 +34,9 @@ def login():
                 flash('Admin login successful!', category='success')
                 login_user(user)
                 return redirect(url_for('auth.adminPort'))
-
+            
+            count = 0
+            while count <3:
             if check_password_hash(user.password, password):
                 flash('Login Succeful!', category='success')
                 login_user(user)
@@ -42,7 +44,7 @@ def login():
                 return redirect(url_for('views.home'))
             else:
                 flash('Incorrect Password!', category='error')
-
+                count += 1
         else:
             flash('Required fields are empty!', category='error')
     return render_template("login.html", user=current_user)

@@ -35,6 +35,7 @@ def login():
                 login_user(user)
                 return redirect(url_for('auth.adminPort'))
             
+            #limits login attempts
             count = 0
             while count <3:
             if check_password_hash(user.password, password):

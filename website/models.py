@@ -28,7 +28,7 @@ class User(db.Model, UserMixin):
     hasMan = db.Column(db.Boolean, default=False)
     status = db.Column(db.Boolean, default=False)
     creationDate = db.Column(db.Date())
-    expDate = db.Column(db.Date())
+    expirationDate = db.Column(db.Date())
     accounts = db.relationship("Account", backref="parent")
 
     def reset_password(self, password, commit=False):
@@ -91,7 +91,7 @@ class User(db.Model, UserMixin):
 
 
 
-class CannotBeDeactivatedError:
+class CannotBeDeactivatedError(Exception):
     # Raised when the user cannot be deactivated because they have a ledger balance above 0
     pass
 
@@ -158,3 +158,9 @@ class Ledger(db.Model):
     def format_led_balance(self, n):
         num = "{:,.2f}".format(n)
         return num
+
+    
+
+
+
+    

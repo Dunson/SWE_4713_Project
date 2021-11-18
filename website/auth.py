@@ -38,16 +38,16 @@ def login():
             #limits login attempts
             count = 0
             while count <3:
-            if check_password_hash(user.password, password):
-                flash('Login Succeful!', category='success')
-                login_user(user)
+                if check_password_hash(user.password, password):
+                    flash('Login Succeful!', category='success')
+                    login_user(user)
 
-                return redirect(url_for('views.home'))
-            else:
-                flash('Incorrect Password!', category='error')
-                count += 1
-            flash('You have exceeded maximum login attempts.', category='error')
-            return render_template('reset_verified.html', user=current_user)
+                    return redirect(url_for('views.home'))
+                else:
+                    flash('Incorrect Password!', category='error')
+                    count += 1
+                flash('You have exceeded maximum login attempts.', category='error')
+                return render_template('reset_verified.html', user=current_user)
             
         else:
             flash('Required fields are empty!', category='error')
@@ -89,7 +89,7 @@ def sign_up():
                                 password_one, method='sha256'),
                             userName=userNameGenGlobal(firstName, lastName),
                             hasAdmin=False, hasMan=False, status=False,
-                            creationDate=datetime.now(), expDate=datetime.now() + timedelta(days=365))
+                            creationDate=datetime.now(), expirationDate=datetime.now() + timedelta(days=365))
 
             db.session.add(new_user)
             db.session.commit()
@@ -282,6 +282,8 @@ def view_account():
         entry_deb = request.form.get('entry_deb')
 
         new_entry = Ledger(entry_date=datetime.now(), entry_desc=entry_desc, entry_cred=entry_cred, entry_deb=entry_deb)
+
+        
 
         return redirect(url_for('auth.view_account'))
 

@@ -1,6 +1,6 @@
-from flask import render_template
+from flask import render_template, request
 from flask_mail import Message
-from . import mail
+from . import mail, views
 
 
 def send_recovery(user):
@@ -14,14 +14,18 @@ def send_recovery(user):
 
     mail.send(msg)
 
-def send_email_to_user(user):
-    msg = Message()
-    msg.subject = "__"  # get input from user
+
+def send_email(user):
+    a = []
+    f = request.form
+    for key in f.keys():
+        for value in f.getlist(key):
+            a = list.append(value)
+
+    msg = a[2]
+    msg.subject = a[0]
     msg.sender = user.email
-    msg.recipients = [user.email]
-    msg.html = render_template('')  # tie to the admin user on choa page?
-  
+    msg.recipients = a[1]
+    msg.html = render_template('email_user.html', user=user)
 
-
-    
-    
+    mail.send(msg)

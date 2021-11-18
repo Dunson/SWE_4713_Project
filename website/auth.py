@@ -3,16 +3,17 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for
 from sqlalchemy.orm import query
 from .models import User, Account, Ledger
 from werkzeug.security import generate_password_hash, check_password_hash
-from . import db
+from . import db, mail
 from flask_login import login_user, login_required, logout_user, current_user
 from .email import send_recovery
 from datetime import datetime, timedelta
-
+from flask_mail import Mail
 auth = Blueprint('auth', __name__)
 
 #GLOBAL Variables
 SEARCHID = 'none'
 ACC_ID = 'none'
+
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -164,8 +165,6 @@ def adminPort():
         else:
             flash('You do not have access to this page.', category='error')
             return redirect(url_for('views.home'))
-
-
 
 
 @auth.route('/accountOverview', methods=['GET', 'POST'])

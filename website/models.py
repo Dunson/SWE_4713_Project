@@ -28,7 +28,7 @@ class User(db.Model, UserMixin):
     hasMan = db.Column(db.Boolean, default=False)
     status = db.Column(db.Boolean, default=False)
     creationDate = db.Column(db.Date())
-    expDate = db.Column(db.Date())
+    expirationDate = db.Column(db.Date())
     accounts = db.relationship("Account", backref="parent")
 
     def reset_password(self, password, commit=False):
@@ -52,7 +52,6 @@ class User(db.Model, UserMixin):
             return
         return User.query.filter_by(email=email).first()
 
-
     # Method for password validation
     def password_check(self, password, passwd2): 
 
@@ -64,7 +63,7 @@ class User(db.Model, UserMixin):
         password_ok = not (length_error or digit_error or uppercase_error or lowercase_error or symbol_error)
         return password_ok
 
-    def update_user(self, usrName, usrEmail, usrFirst, usrLast, usrMan, usrAdmin, usrStat, commit=False):
+    def update_user(self, usrName, usrEmail, usrFirst, usrLast, usrMan, usrAdmin, usrStat, expDate, commit=False):
         self.firstName = usrFirst
         self.lastName = usrLast 
         self.email = usrEmail
@@ -72,6 +71,7 @@ class User(db.Model, UserMixin):
         self.hasAdmin = usrAdmin
         self.status = usrStat
         self.userName = usrName
+        self.expirationDate = expDate
 
         if commit:
             db.session.commit()
@@ -88,7 +88,15 @@ class User(db.Model, UserMixin):
         if self.hasAdmin and datetime.now() == self.password_expire() - timedelta(days=3):
             return True
 
+    def get_exp_pw(self):
+        pw_list = []
+        no_exp = "There are no passwords currently expired."
 
+        if self.hasAdmin:
+            pw_list = db.select().where(db.Column.expirationDate(datetime.now()))
+            return pw_list
+        elif len(pw_list) == 0:
+            return no_exp
 
 
 class CannotBeDeactivatedError:

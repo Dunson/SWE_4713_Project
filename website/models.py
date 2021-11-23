@@ -1,8 +1,6 @@
 from sqlalchemy.orm import backref
-
 from werkzeug.datastructures import _CacheControl
 from werkzeug.security import generate_password_hash, check_password_hash
-
 from . import db 
 from flask_login import UserMixin
 from sqlalchemy.sql import func
@@ -119,10 +117,6 @@ class Account(db.Model):
     init_bal = db.Column(db.Float)
 
     acc_statement = db.Column(db.String(150))
-    
-    account_list = []
-
-
 
     def user_balance_above_zero(self):
         if self.init_bal > 0:

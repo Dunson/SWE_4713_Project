@@ -300,11 +300,12 @@ def view_account():
         db.session.add(new_entry)
         db.session.commit()
 
-        entry_num = new_entry.get_entry_num()
-        prev_entry_num = entry_num - 1
-        
+    
+        prev_entry_num = new_entry.get_entry_num() - 1
         prev_entry = Ledger.query.filter_by(entry_num = prev_entry_num).first()
-        prev_bal = prev_entry.entry_bal
+        prev_bal = ''
+        if prev_entry:
+            prev_bal = prev_entry.entry_bal
 
         
         if new_entry.entry_num == 1:

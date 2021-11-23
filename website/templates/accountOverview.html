@@ -12,7 +12,7 @@
         <br>
         Status: {% if query[searchID | int - 1].status == True %} Activated {% else %} Deactivated {% endif %}
         <br>
-        Type: {% if query[searchID | int - 1].hasAdmin %} Admininstrator {% elif query[searchID | int - 1].hasMan%} Manager {% else %} User {% endif %}
+        Type: {% if query[searchID | int - 1].hasAdmin %} Admininstrator {% elif query[searchID | int - 1].hasMan%} Manager {% else %} Accountant {% endif %}
       </p>
     </div>
   
@@ -97,7 +97,7 @@
                   id="inlineRadioOptionsUserType1" onclick="fixUsr(); return true;" {% if
                   (query[searchID | int - 1].hasMan == False ) and (query[searchID | int -
                   1].hasAdmin == False) %} checked {% endif %}/>
-                  <label class="form-check-label" for="inlineRadio">User</label>
+                  <label class="form-check-label" for="inlineRadio">Accountant</label>
                 </div>
           
                 <div class="form-check form-check-inline">

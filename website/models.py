@@ -101,8 +101,6 @@ class User(db.Model, UserMixin):
             return True
 
 
-
-
 class CannotBeDeactivatedError(Exception):
     # Raised when the user cannot be deactivated because they have a ledger balance above 0
     pass
@@ -117,21 +115,14 @@ class Account(db.Model):
     acc_name = db.Column(db.String(150), unique=True)
     acc_desc = db.Column(db.String(150))
     acc_cat = db.Column(db.String(150))
-    # acc_sub_cat = db.Column(db.String(150)
    
     init_bal = db.Column(db.Float)
-    # acc_bal = db.Column(db.Float)
-    # acc_deb = db.Column(db.Float)
-    # acc_cred = db.Column(db.Float)
 
     acc_statement = db.Column(db.String(150))
-    # acc_order = db.Column(db.Integer)
+    
+    account_list = []
 
-    # creation_date = db.Column(db.Date())
-    # creation_time = db.Column(db.Time(), nullable = False)
 
-    # acc_status = db.Column(db.Boolean, default = False)
-    # acc_comment = db.Column(db.String(150))
 
     def user_balance_above_zero(self):
         if self.init_bal > 0:
@@ -171,24 +162,8 @@ class Ledger(db.Model):
         num = "{:,.2f}".format(n)
         return num
 
-    def calculate_balance(self):
-        debit = float(self.entry_deb)
-        credit = float(self.entry_cred)
-        
-        db.select(db).where(db.columns.entry_num == self.entry_num - 1)
-
-
-        ent_bal = debit - credit
-        curr_bal = self.entry_bal
-        total_balance = 0
-
-        if ent_bal > 0:
-            total_balance += (ent_bal + curr_bal)
-        else:
-            total_balance -= (ent_bal + curr_bal)
-        print(total_balance)
-    
-        return total_balance
+    def get_entry_num(self):
+        return self.entry_num
 
     def update_balance(self, balance, commit = False):
 

@@ -14,6 +14,7 @@ auth = Blueprint('auth', __name__)
 #GLOBAL Variables
 SEARCHID = 'none'
 ACC_ID = 'none'
+LEDGER_NUM = 0
 ATTEMPT_COUNT = 0
 
 @auth.route('/login', methods=['GET', 'POST'])
@@ -290,25 +291,30 @@ def view_account():
         entry_deb = request.form.get('entry_deb')
 
         acc_id = int(ACC_ID)
+
         init_deb = float(entry_deb)
         init_cred = float(entry_cred)
-        init_bal = init_deb - init_cred
+        entry_bal = init_deb - init_cred
         
-        new_entry = Ledger(acc_num = acc_id, entry_date=datetime.now(), entry_desc=entry_desc, entry_cred=entry_cred, entry_deb=entry_deb, entry_bal = 0.00)
+        new_entry = Ledger(acc_num = acc_id, entry_date=datetime.now(), entry_desc=entry_desc, entry_cred=entry_cred, entry_deb=entry_deb, entry_bal = entry_bal)
         db.session.add(new_entry)
-        
-        x = []
-        x.append(new_entry)
-        print(x)
+        db.session.commit()
 
+        entry_num = new_entry.get_entry_num()
+        prev_entry_num = entry_num - 1
+        
+        prev_entry = Ledger.query.filter_by(entry_num = prev_entry_num).first()
+        prev_bal = prev_entry.entry_bal
+
+        
         if new_entry.entry_num == 1:
-            new_entry.update_balance(init_bal, commit=True)
+            new_entry.update_balance(entry_bal, commit=True)
         else:
-            new_balance = new_entry.calculate_balance()
+            new_balance = format_balance(calculate_balance(prev_bal, entry_bal))
             new_entry.update_balance(new_balance, commit=True)
-
         
-        return redirect(url_for('auth.view_account'))
+        
+        return redirect(url_for('auth.view_account',legder_num = acc_id))
 
 
     return render_template('accountView.html', user = current_user, acc_ID = ACC_ID, 
@@ -339,7 +345,14 @@ def update_log_attempt(count):
     return count
 
 
+def calculate_balance(prev_entry, curr_entry):
+    return prev_entry + curr_entry
 
+
+def format_balance(n):
+        num = "{:,.2f}".format(n)
+        return num
+    
 
 
 

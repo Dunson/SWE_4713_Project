@@ -17,6 +17,7 @@ import smtplib
 # Defined User table for database
 class User(db.Model, UserMixin):
 
+    # DB_Table variables
     id = db.Column(db.Integer, primary_key=True)  # unique identifier
     email = db.Column(db.String(150), unique=True)
     password = db.Column(db.String(150))
@@ -30,6 +31,17 @@ class User(db.Model, UserMixin):
     creationDate = db.Column(db.Date())
     expirationDate = db.Column(db.Date())
     accounts = db.relationship("Account", backref="parent")
+
+    
+    
+   
+    def deactivate_user(self, commit = False):
+        self.status = False
+        if commit:
+            db.session.commit()
+            
+
+
 
     def reset_password(self, password, commit=False):
         self.oldPassword = self.password
@@ -158,6 +170,36 @@ class Ledger(db.Model):
     def format_led_balance(self, n):
         num = "{:,.2f}".format(n)
         return num
+
+    def calculate_balance(self):
+        debit = float(self.entry_deb)
+        credit = float(self.entry_cred)
+        
+        db.select(db).where(db.columns.entry_num == self.entry_num - 1)
+
+
+        ent_bal = debit - credit
+        curr_bal = self.entry_bal
+        total_balance = 0
+
+        if ent_bal > 0:
+            total_balance += (ent_bal + curr_bal)
+        else:
+            total_balance -= (ent_bal + curr_bal)
+        print(total_balance)
+    
+        return total_balance
+
+    def update_balance(self, balance, commit = False):
+
+        self.entry_bal = balance        
+
+        if commit:
+            db.session.commit()
+
+
+    
+
 
     
 

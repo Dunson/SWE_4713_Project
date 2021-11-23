@@ -8,14 +8,19 @@ from flask_login import login_user, login_required, logout_user, current_user
 from .email import send_recovery
 from datetime import datetime, timedelta
 
+
 auth = Blueprint('auth', __name__)
 
 #GLOBAL Variables
 SEARCHID = 'none'
 ACC_ID = 'none'
+ATTEMPT_COUNT = 0
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+
+    
+
     if request.method == 'POST':
 
         email = request.form.get('email')
@@ -34,21 +39,24 @@ def login():
                 flash('Admin login successful!', category='success')
                 login_user(user)
                 return redirect(url_for('auth.adminPort'))
-            
-            #limits login attempts
-            count = 0
-            while count <3:
-                if check_password_hash(user.password, password):
-                    flash('Login Succeful!', category='success')
-                    login_user(user)
+        
 
-                    return redirect(url_for('views.home'))
-                else:
-                    flash('Incorrect Password!', category='error')
-                    count += 1
-                flash('You have exceeded maximum login attempts.', category='error')
-                return render_template('reset_verified.html', user=current_user)
+            # Limits login attempts 
+            if check_password_hash(user.password, password):
+                flash('Login Succeful!', category='success')
+                login_user(user)
+                global ATTEMPT_COUNT
+                ATTEMPT_COUNT = 0
+                return redirect(url_for('views.home'))
+            else:
+                flash('Incorrect Password! Attempt: ' + str(ATTEMPT_COUNT), category='error')
+                ATTEMPT_COUNT += 1
             
+            if ATTEMPT_COUNT > 3:    
+                flash('You have exceeded maximum login attempts. Your account has been deactivated.', category='error')
+                User.deactivate_user(user, commit = True)
+                return render_template('login.html', user=current_user)
+
         else:
             flash('Required fields are empty!', category='error')
     return render_template("login.html", user=current_user)
@@ -281,21 +289,41 @@ def view_account():
         entry_cred = request.form.get('entry_cred')
         entry_deb = request.form.get('entry_deb')
 
-        new_entry = Ledger(entry_date=datetime.now(), entry_desc=entry_desc, entry_cred=entry_cred, entry_deb=entry_deb)
+        acc_id = int(ACC_ID)
+        init_deb = float(entry_deb)
+        init_cred = float(entry_cred)
+        init_bal = init_deb - init_cred
+        
+        new_entry = Ledger(acc_num = acc_id, entry_date=datetime.now(), entry_desc=entry_desc, entry_cred=entry_cred, entry_deb=entry_deb, entry_bal = 0.00)
+        db.session.add(new_entry)
+        
+        x = []
+        x.append(new_entry)
+        print(x)
+
+        if new_entry.entry_num == 1:
+            new_entry.update_balance(init_bal, commit=True)
+        else:
+            new_balance = new_entry.calculate_balance()
+            new_entry.update_balance(new_balance, commit=True)
 
         
-
         return redirect(url_for('auth.view_account'))
-
-
 
 
     return render_template('accountView.html', user = current_user, acc_ID = ACC_ID, 
                         acc_query = Account.query.join(User).filter(Account.user_id==SEARCHID),
                         led_query = Ledger.query.join(Account).filter(Ledger.acc_num==ACC_ID))
 
+@auth.route('/help')
+def help():
+    return render_template("help.html", user = current_user)
 
-#Username generator
+
+
+# --Tools---
+
+# Username generator
 def userNameGenGlobal(first, last):
     currMonth = str(datetime.now().month)
     currYear = str(datetime.now().year)
@@ -306,23 +334,14 @@ def userNameGenGlobal(first, last):
     userName = first[0] + last + currMonth + currYear[2] + currYear[3]
     return userName
 
-@auth.route('/help')
-def help():
-    return render_template("help.html", user = current_user)
+def update_log_attempt(count):
+    count +=1
+    return count
 
-#May not need this method
-"""
-#NEEDS WORK - ROUTING ACCOUNTS TO LEDGER 
 
-@auth.route('/account_ledger', methods = ['GET', 'POST'])
-@login_required
-def account_ledger():
-    
-   
 
-    return render_template('acc_ledger.html', user = current_user, 
-                            led_query = Ledger.query.join(Account).filter(Ledger.acc_num==ACC_ID)) 
-"""
+
+
 
     
     

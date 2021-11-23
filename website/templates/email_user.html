@@ -1,3 +1,9 @@
+{% extends "base.html" %}
+
+{% block title %} Help {% endblock %}
+
+{%block content%}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,11 +14,14 @@
     <div>
 	<h2 class="text-dark pt-2">Email A User</h2>
 	<form class="form-inline" id="emailform" method="POST">
+        <div style="margin: 10px 0 10px 0;"></div>
   <input type="text" name="email" size = "40" placeholder="email">
 <br>
   <input type="text" name="subject" size = "40" placeholder="subject">
+        <div style="margin: 10px 0 10px 0;"></div>
 <br>
 <textarea rows="5" cols="50" name="comment" form="emailform"></textarea>
+        <div style="margin: 10px 0 10px 0;"></div>
 <br>
 <input type = "submit" >
 		</form>
@@ -20,3 +29,4 @@
 
 </body>
 </html>
+{%  endblock %}

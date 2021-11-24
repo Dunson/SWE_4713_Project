@@ -1,6 +1,8 @@
 from sqlalchemy.orm import backref
+
 from werkzeug.datastructures import _CacheControl
 from werkzeug.security import generate_password_hash, check_password_hash
+
 from . import db 
 from flask_login import UserMixin
 from sqlalchemy.sql import func
@@ -15,7 +17,6 @@ import smtplib
 # Defined User table for database
 class User(db.Model, UserMixin):
 
-    # DB_Table variables
     id = db.Column(db.Integer, primary_key=True)  # unique identifier
     email = db.Column(db.String(150), unique=True)
     password = db.Column(db.String(150))
@@ -28,18 +29,9 @@ class User(db.Model, UserMixin):
     status = db.Column(db.Boolean, default=False)
     creationDate = db.Column(db.Date())
     expirationDate = db.Column(db.Date())
+    suspensionDate = db.Column(db.Date())
+    suspensionEnd = db.Column(db.Date())
     accounts = db.relationship("Account", backref="parent")
-
-    
-    
-   
-    def deactivate_user(self, commit = False):
-        self.status = False
-        if commit:
-            db.session.commit()
-            
-
-
 
     def reset_password(self, password, commit=False):
         self.oldPassword = self.password
@@ -99,9 +91,18 @@ class User(db.Model, UserMixin):
             return True
 
 
+
+
 class CannotBeDeactivatedError(Exception):
     # Raised when the user cannot be deactivated because they have a ledger balance above 0
     pass
+
+class ErrorLog(db.Model):
+    error_id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    error_desc = db.Column(db.String(200))
 
 
 class Account(db.Model):
@@ -113,10 +114,21 @@ class Account(db.Model):
     acc_name = db.Column(db.String(150), unique=True)
     acc_desc = db.Column(db.String(150))
     acc_cat = db.Column(db.String(150))
+    # acc_sub_cat = db.Column(db.String(150)
    
     init_bal = db.Column(db.Float)
+    # acc_bal = db.Column(db.Float)
+    # acc_deb = db.Column(db.Float)
+    # acc_cred = db.Column(db.Float)
 
     acc_statement = db.Column(db.String(150))
+    # acc_order = db.Column(db.Integer)
+
+    # creation_date = db.Column(db.Date())
+    # creation_time = db.Column(db.Time(), nullable = False)
+
+    # acc_status = db.Column(db.Boolean, default = False)
+    # acc_comment = db.Column(db.String(150))
 
     def user_balance_above_zero(self):
         if self.init_bal > 0:
@@ -155,20 +167,6 @@ class Ledger(db.Model):
     def format_led_balance(self, n):
         num = "{:,.2f}".format(n)
         return num
-
-    def get_entry_num(self):
-        return self.entry_num
-
-    def update_balance(self, balance, commit = False):
-
-        self.entry_bal = balance        
-
-        if commit:
-            db.session.commit()
-
-
-    
-
 
     
 

@@ -3,10 +3,10 @@
 
 {%block content%}
 <br>
-<h2>Ledger for Account: {{acc_query[acc_ID | int - 1].acc_name}}</h2>
-<div class="container-fluid" style="height: 400px; overflow-y: scroll;">
-    <table class="table table-striped table-dark"">
-        <thead class="sticky-top bg-dark">
+<div class="container-fluid" style="height: 400px">
+    <h2>Ledger for Account: {{acc_query[acc_ID | int - 1].acc_name}}</h2>
+    <table class="table table-striped table-dark">
+        <thead>
           <tr>
             <th scope="col">Date</th>
             <th scope="col">Description</th>
@@ -21,16 +21,18 @@
           <tr id="rowz">
             <td>{{ledger.entry_date}}</td>
             <td>{{ledger.entry_desc}}</td>
-            <td>{{ledger.entry_deb}}</td>
-            <td>{{ledger.entry_cred}}</td>
-            <td>$ {{ledger.entry_bal}}</td>
+            <td><input type="number" name="debit" size="10" step = ".01" value="{{ledger.entry_deb}}"></td>
+            <td><input type="number" name="credit" size="10" step = ".01" value="{{ledger.entry_cred}}"></td>
+            <td>${{ledger.entry_bal}}</td>
           </tr>
           {% endfor %}
           
         </tbody>
       </table>
 
-      
+      <div class="text-center">
+        <button class="btn btn-success" type="button" data-toggle="modal" data-target="#ledgermodal">Add Entry</button>
+      </div>
 
       <div class="modal fade" id="ledgermodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -93,11 +95,12 @@
       </div>
 
 
+
+
+
+
 </div>
-<br>
-<div class="text-center">
-  <button class="btn btn-success" type="button" data-toggle="modal" data-target="#ledgermodal">Add Entry</button>
-</div>
+
 
 
 {% endblock %}

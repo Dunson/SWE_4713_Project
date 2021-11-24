@@ -1,18 +1,39 @@
 from os import error
+from smtplib import SMTPAuthenticationError
+
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from sqlalchemy.orm import query
 from .models import User, Account, Ledger
 from werkzeug.security import generate_password_hash, check_password_hash
-from . import db
+from . import db, mail
 from flask_login import login_user, login_required, logout_user, current_user
 from .email import send_recovery
 from datetime import datetime, timedelta
-
+from flask_mail import Mail, Message
 auth = Blueprint('auth', __name__)
 
 #GLOBAL Variables
 SEARCHID = 'none'
 ACC_ID = 'none'
+
+# GLOBAL ERROR MESSAGES
+email_error = 'The email provided is either not correct or there is an internal error with the server'
+no_access = 'You do not have access to this page.'
+ipw = 'Incorrect Password!'
+fields_empty = 'Required fields are empty!'
+not_activated = 'Your account must be activated by an administrator.'
+acc_exists = 'An account with that email already exists!'
+gt_1_c = 'First name must be greater than 1 character'
+mismatch_pw = 'Passwords do not match'
+cannot_reuse = 'You can not reuse an old password!'
+does_not_meet_reqs = 'Password does not meet the requirements'
+email_not_found = 'That email was not found in our records.'
+reset_token_expired = 'Reset Token Expired!'
+no_blank = 'Input field can not be blank.'
+
+
+def add_err_to_db(err):
+    pass
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -26,14 +47,24 @@ def login():
         if user:
 
             if user.status == False:
-                flash('Your account must be activated by an administrator.',
-                      category='error')
+                flash(not_activated, category='error')
                 return redirect(url_for('auth.login'))
 
             if user.hasAdmin == True and check_password_hash(user.password, password):
                 flash('Admin login successful!', category='success')
                 login_user(user)
                 return redirect(url_for('auth.adminPort'))
+<<<<<<< HEAD
+
+            if check_password_hash(user.password, password):
+                flash('Login Succeful!', category='success')
+                login_user(user)
+
+                return redirect(url_for('views.home'))
+            else:
+                flash(ipw, category='error')
+
+=======
             
             #limits login attempts
             count = 0
@@ -49,8 +80,9 @@ def login():
                 flash('You have exceeded maximum login attempts.', category='error')
                 return render_template('reset_verified.html', user=current_user)
             
+>>>>>>> origin/master
         else:
-            flash('Required fields are empty!', category='error')
+            flash(fields_empty, category='error')
     return render_template("login.html", user=current_user)
 
 
@@ -75,13 +107,13 @@ def sign_up():
 
         # Creation validation logic
         if user:
-            flash('An account with that email already exists!', category='error')
+            flash(acc_exists, category='error')
         elif len(firstName) < 2:
-            flash('First name must be greater than 1 character', category='error')
+            flash(gt_1_c, category='error')
         elif password_one != password_two:  # This compares the two passwords
-            flash('Passwords do not match', category='error')
+            flash(mismatch_pw, category='error')
         elif not pwd_check:
-            flash('Password does not meet the requirements', category='error')
+            flash(does_not_meet_reqs, category='error')
         else:
             # Add user to database
             new_user = User(email=email, firstName=firstName, lastName=lastName,
@@ -108,7 +140,7 @@ def recovery_Page():
         # Check if email is in database
         user = User.query.filter_by(email=email).first()
         if not user:
-            flash('That email was not found in our records.', category='error')
+            flash(email_not_found, category='error')
         else:
             send_recovery(user)
             flash('Recovery email sent!', category='success')
@@ -123,7 +155,7 @@ def reset_password(token):
     user = User.verify_reset_token(token)
 
     if not user:
-        flash('Reset Token Expired!', category='error')
+        flash(reset_token_expired, category='error')
         return redirect(url_for('auth.login'))
 
     password1 = request.form.get('password1')
@@ -134,14 +166,14 @@ def reset_password(token):
             print(check_password_hash(user.oldPassword, password1))
 
             if check_password_hash(user.oldPassword, password1):
-                flash('You can not reuse an old password!', category='error')
+                flash(cannot_reuse, category='error')
                 return redirect(url_for('auth.reset_password', token=token))
 
             user.reset_password(password1, commit=True)
             flash('Password Reset Successful!!', category='success')
             return redirect(url_for('auth.login'))
         else:
-            flash('Passwords must match!', category='error')
+            flash(mismatch_pw, category='error')
 
     return render_template('reset_verified.html', user=current_user)
 
@@ -157,7 +189,7 @@ def adminPort():
         global SEARCHID
         SEARCHID = request.form.get('searchBar')
         if len(SEARCHID) < 1:
-            flash('Search field can not be blank.', category='error')
+            flash(no_blank, category='error')
             return redirect(url_for('auth.adminPort'))
         else:
             return redirect(url_for('auth.accountOverview'))
@@ -168,10 +200,8 @@ def adminPort():
             return render_template('adminPortal.html',
                                    user=current_user, query=User.query.all())
         else:
-            flash('You do not have access to this page.', category='error')
+            flash(no_access, category='error')
             return redirect(url_for('views.home'))
-
-
 
 
 @auth.route('/accountOverview', methods=['GET', 'POST'])
@@ -205,7 +235,7 @@ def accountOverview():
                     usr_hasAdmin = True
 
                 if len(firstName) < 2 or len(lastName) < 2 or len(email) < 1:
-                    flash('Input fields can not be blank.', category='error')
+                    flash(no_blank, category='error')
                     return redirect(url_for('auth.accountOverview'))
                 else:
                     userName = userNameGenGlobal(firstName, lastName)
@@ -230,7 +260,7 @@ def accountOverview():
                 return redirect(url_for('auth.view_account'))
 
     else:
-        flash('You do not have access to this page.', category='error')
+        flash(no_access, category='error')
         return redirect(url_for('views.home'))    
 
     return render_template('accountOverview.html', user=current_user, 
@@ -308,7 +338,33 @@ def userNameGenGlobal(first, last):
 
 @auth.route('/help')
 def help():
-    return render_template("help.html", user = current_user)
+    return render_template("help.html", use=current_user)
+
+@auth.route('/email_user')
+def e():
+    return render_template("email_user.html", user=current_user)
+
+@auth.route('/email_user', methods=['POST','GET'])
+def send_email():
+    user=current_user
+    a = list()
+    f = request.form
+    for key in f.keys():
+        for value in f.getlist(key):
+            a.append(key)
+
+    msg = Message(f'{a[0]}', sender=user.email, recipients=a[2])
+    msg.body = a[2]
+    msg.html = render_template('email_user.html', user=user)
+
+    # there is an SMTP auth error here, Brandon you probably need to update your credentials
+    try:
+        mail.send(msg)
+    except SMTPAuthenticationError:
+        flash(email_error, category='error')
+        return render_template('email_user.html', user=user)
+
+
 
 #May not need this method
 """

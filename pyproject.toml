@@ -5,7 +5,7 @@ description = "Initial attempt to add dependency management"
 authors = ["Brandon Dunson <brandondunson15@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 Flask = "^2.0.1"
 Flask-Login = "^0.5.0"
 Flask-Mail = "^0.9.1"

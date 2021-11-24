@@ -29,6 +29,8 @@ class User(db.Model, UserMixin):
     status = db.Column(db.Boolean, default=False)
     creationDate = db.Column(db.Date())
     expirationDate = db.Column(db.Date())
+    suspensionDate = db.Column(db.Date())
+    suspensionEnd = db.Column(db.Date())
     accounts = db.relationship("Account", backref="parent")
 
     def reset_password(self, password, commit=False):
@@ -52,6 +54,7 @@ class User(db.Model, UserMixin):
             return
         return User.query.filter_by(email=email).first()
 
+
     # Method for password validation
     def password_check(self, password, passwd2): 
 
@@ -63,7 +66,7 @@ class User(db.Model, UserMixin):
         password_ok = not (length_error or digit_error or uppercase_error or lowercase_error or symbol_error)
         return password_ok
 
-    def update_user(self, usrName, usrEmail, usrFirst, usrLast, usrMan, usrAdmin, usrStat, expDate, commit=False):
+    def update_user(self, usrName, usrEmail, usrFirst, usrLast, usrMan, usrAdmin, usrStat, commit=False):
         self.firstName = usrFirst
         self.lastName = usrLast 
         self.email = usrEmail
@@ -71,7 +74,6 @@ class User(db.Model, UserMixin):
         self.hasAdmin = usrAdmin
         self.status = usrStat
         self.userName = usrName
-        self.expirationDate = expDate
 
         if commit:
             db.session.commit()
@@ -88,21 +90,19 @@ class User(db.Model, UserMixin):
         if self.hasAdmin and datetime.now() == self.password_expire() - timedelta(days=3):
             return True
 
-    def get_exp_pw(self):
-        pw_list = []
-        no_exp = "There are no passwords currently expired."
-
-        if self.hasAdmin:
-            pw_list = db.select().where(db.Column.expirationDate(datetime.now()))
-            return pw_list
-        elif len(pw_list) == 0:
-
-            return no_exp
 
 
-class CannotBeDeactivatedError:
+
+class CannotBeDeactivatedError(Exception):
     # Raised when the user cannot be deactivated because they have a ledger balance above 0
     pass
+
+class ErrorLog(db.Model):
+    error_id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    error_desc = db.Column(db.String(200))
 
 
 class Account(db.Model):
@@ -154,8 +154,11 @@ class Ledger(db.Model):
 
     entry_num = db.Column(db.Integer, primary_key=True)
     acc_num = db.Column(db.Integer, db.ForeignKey('account.acc_num'), nullable=False)
+
     entry_desc = db.Column(db.String(150))
+
     entry_date = db.Column(db.Date())
+    
     entry_bal = db.Column(db.Float)
     entry_cred = db.Column(db.Float)
     entry_deb = db.Column(db.Float)
@@ -164,3 +167,9 @@ class Ledger(db.Model):
     def format_led_balance(self, n):
         num = "{:,.2f}".format(n)
         return num
+
+    
+
+
+
+    

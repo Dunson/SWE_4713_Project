@@ -96,6 +96,7 @@ class User(db.Model, UserMixin):
             pw_list = db.select().where(db.Column.expirationDate(datetime.now()))
             return pw_list
         elif len(pw_list) == 0:
+
             return no_exp
 
 

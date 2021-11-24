@@ -50,10 +50,10 @@ def login():
                 ATTEMPT_COUNT = 0
                 return redirect(url_for('views.home'))
             else:
-                flash('Incorrect Password! Attempt: ' + str(ATTEMPT_COUNT), category='error')
+                flash('Incorrect Password! Attempt: ' + str(ATTEMPT_COUNT + 1), category='error')
                 ATTEMPT_COUNT += 1
             
-            if ATTEMPT_COUNT > 3:    
+            if ATTEMPT_COUNT >= 3:    
                 flash('You have exceeded maximum login attempts. Your account has been deactivated.', category='error')
                 User.deactivate_user(user, commit = True)
                 return render_template('login.html', user=current_user)
@@ -230,7 +230,7 @@ def accountOverview():
                 else:
                     flash('Account Update Failed!', category='error')
                     
-            #Using exception handling to determine the difference in POST requests. If a better alternative exists. Change ASAP
+            #Using exception handling to determine the difference in POST requests. If a better alternative exists, Change ASAP
             except TypeError as err:
                 #flash("TypeError: {0}".format(err), category='error')
                 #return redirect(url_for('auth.accountOverview'))
@@ -345,10 +345,8 @@ def update_log_attempt(count):
     count +=1
     return count
 
-
 def calculate_balance(prev_entry, curr_entry):
     return prev_entry + curr_entry
-
 
 def format_balance(n):
         num = "{:,.2f}".format(n)

@@ -36,7 +36,6 @@ exceeded_att = 'You have exceeded maximum login attempts.'
 
 
 class Error(db.Model):
-    __tablename__ = errorLog
     error_id = db.Column(db.Integer, primary_key=True)
     error_desc = db.Column(db.String(200))
 
@@ -242,8 +241,7 @@ def adminPort():
     else:
 
         if current_user.hasAdmin:
-            return render_template('adminPortal.html',
-                                   user=current_user, query=User.query.all())
+            return render_template('adminPortal.html', user=current_user, query=User.query.all())
         else:
             flash(no_access, category='error')
             error = Error((random.random(), no_access))
@@ -382,7 +380,7 @@ def view_account():
                         led_query = Ledger.query.join(Account).filter(Ledger.acc_num==ACC_ID))
 
 
-#Username generator
+# Username generator
 def userNameGenGlobal(first, last):
     currMonth = str(datetime.now().month)
     currYear = str(datetime.now().year)
@@ -393,13 +391,16 @@ def userNameGenGlobal(first, last):
     userName = first[0] + last + currMonth + currYear[2] + currYear[3]
     return userName
 
+
 @auth.route('/help')
 def help():
     return render_template("help.html", use=current_user)
 
+
 @auth.route('/email_user')
 def e():
     return render_template("email_user.html", user=current_user)
+
 
 @auth.route('/email_user', methods=['POST','GET'])
 def send_email():

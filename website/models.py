@@ -152,11 +152,8 @@ class Ledger(db.Model):
 
     entry_num = db.Column(db.Integer, primary_key=True)
     acc_num = db.Column(db.Integer, db.ForeignKey('account.acc_num'), nullable=False)
-
     entry_desc = db.Column(db.String(150))
-
     entry_date = db.Column(db.Date())
-    
     entry_bal = db.Column(db.Float)
     entry_cred = db.Column(db.Float)
     entry_deb = db.Column(db.Float)
@@ -165,9 +162,3 @@ class Ledger(db.Model):
     def format_led_balance(self, n):
         num = "{:,.2f}".format(n)
         return num
-
-    
-
-
-
-    

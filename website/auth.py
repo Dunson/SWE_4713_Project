@@ -63,8 +63,6 @@ def login():
             else:
                 flash(ipw, category='error')
 
-
-            
             # Limits login attempts 
             if check_password_hash(user.password, password):
                 flash('Login Succeful!', category='success')

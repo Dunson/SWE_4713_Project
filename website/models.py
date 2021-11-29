@@ -88,7 +88,10 @@ class User(db.Model, UserMixin):
         if self.hasAdmin and datetime.now() == self.password_expire() - timedelta(days=3):
             return True
 
-
+    def deactivate_user(self, commit = False):
+        self.status = False
+        if commit:
+            db.session.commit()
 
 
 class CannotBeDeactivatedError(Exception):

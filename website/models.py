@@ -180,7 +180,7 @@ class Ledger(db.Model):
     entry_bal = db.Column(db.Float)
     entry_cred = db.Column(db.Float)
     entry_deb = db.Column(db.Float)
-    isApproved = db.column(db.Boolean, nullable=False)
+    isApproved = db.column(db.Boolean, nullable=False, default=False)
     journal_id = db.Column(db.Integer, db.ForeignKey('journal.id'), nullable=False)
 
     # function to format balances to comma and 2 decimal place. Must pass in a number

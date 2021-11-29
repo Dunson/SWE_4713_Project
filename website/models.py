@@ -1,8 +1,6 @@
 from sqlalchemy.orm import backref
-
 from werkzeug.datastructures import _CacheControl
 from werkzeug.security import generate_password_hash, check_password_hash
-
 from . import db 
 from flask_login import UserMixin
 from sqlalchemy.sql import func
@@ -105,28 +103,17 @@ class ErrorLog(db.Model):
 
 class Account(db.Model):
     
-    acc_num = db.Column(db.Integer, primary_key=True)  # unique identifier. Needs adjusting
-
+    acc_num = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     acc_name = db.Column(db.String(150), unique=True)
     acc_desc = db.Column(db.String(150))
     acc_cat = db.Column(db.String(150))
-    # acc_sub_cat = db.Column(db.String(150)
-   
+
     init_bal = db.Column(db.Float)
-    # acc_bal = db.Column(db.Float)
-    # acc_deb = db.Column(db.Float)
-    # acc_cred = db.Column(db.Float)
 
     acc_statement = db.Column(db.String(150))
-    # acc_order = db.Column(db.Integer)
-
-    # creation_date = db.Column(db.Date())
-    # creation_time = db.Column(db.Time(), nullable = False)
-
-    # acc_status = db.Column(db.Boolean, default = False)
-    # acc_comment = db.Column(db.String(150))
+    
 
     def user_balance_above_zero(self):
         if self.init_bal > 0:
@@ -165,6 +152,21 @@ class Ledger(db.Model):
     def format_led_balance(self, n):
         num = "{:,.2f}".format(n)
         return num
+
+    # function to format balances to comma and 2 decimal place. Must pass in a number
+    def format_led_balance(self, n):
+        num = "{:,.2f}".format(n)
+        return num
+
+    def get_entry_num(self):
+        return self.entry_num
+
+    def update_balance(self, balance, commit = False):
+
+        self.entry_bal = balance        
+
+        if commit:
+            db.session.commit()
 
     
 

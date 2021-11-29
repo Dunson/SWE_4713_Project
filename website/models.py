@@ -97,10 +97,21 @@ class CannotBeDeactivatedError(Exception):
     # Raised when the user cannot be deactivated because they have a ledger balance above 0
     pass
 
-class ErrorLog(db.Model):
-    error_id = db.Column(db.Integer, primary_key=True)
 
+class Error(db.Model):
+    __tablename__ = 'errorLog'
+    error_id = db.Column(db.Integer, primary_key=True)
     error_desc = db.Column(db.String(200))
+
+    def __init__(self, error_desc):
+        self.error_desc = error_desc
+
+    def errorcreate(self, error_desc, commit=False):
+
+        self.error_desc = error_desc
+
+        if commit:
+            db.session.commit()
 
 
 class Account(db.Model):

@@ -3,7 +3,7 @@ from smtplib import SMTPAuthenticationError
 import random
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from sqlalchemy.orm import query
-from .models import User, Account, Ledger
+from .models import User, Account, Ledger, Error
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db, mail
 from flask_login import login_user, login_required, logout_user, current_user
@@ -35,14 +35,6 @@ acc_ufail = 'Account Update Failed!'
 exceeded_att = 'You have exceeded maximum login attempts.'
 
 
-class Error(db.Model):
-    error_id = db.Column(db.Integer, primary_key=True)
-    error_desc = db.Column(db.String(200))
-
-    def __init__(self, error_id, error_desc):
-        self.error_id = error_id
-        self.error_desc = error_desc
-
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -57,9 +49,9 @@ def login():
 
             if user.status == False:
                 flash(not_activated, category='error')
-                error = Error(error_id=int(random.random()), error_desc=not_activated)
+                error = Error(error_desc=not_activated)
                 db.session.add(error)
-                db.session.commit()
+                error.errorcreate(not_activated, commit=True)
                 return redirect(url_for('auth.login'))
 
             if user.hasAdmin == True and check_password_hash(user.password, password):
@@ -74,6 +66,9 @@ def login():
                 return redirect(url_for('views.home'))
             else:
                 flash(ipw, category='error')
+                error = Error(error_desc=ipw)
+                db.session.add(error)
+                error.errorcreate(ipw, commit=True)
 
             #limits login attempts
             count = 0
@@ -85,21 +80,20 @@ def login():
                     return redirect(url_for('views.home'))
                 else:
                     flash(ipw, category='error')
-                    error = Error(error_id=int(random.random()), error_desc=ipw)
-                    db.session.add(error)
-                    db.session.commit()
+                    error = Error(error_desc=ipw)
+                    error.errorcreate(ipw, commit=True)
                     count += 1
                 flash(exceeded_att, category='error')
-                error = Error(error_id=int(random.random()), error_desc=exceeded_att)
+                error = Error(error_desc=exceeded_att)
+                error.errorcreate(exceeded_att, commit=True)
                 db.session.add(error)
-                db.session.commit()
                 return render_template('reset_verified.html', user=current_user)
 
         else:
             flash(fields_empty, category='error')
-            error = Error(error_id=int(random.random()), error_desc=fields_empty)
+            error = Error(error_desc=fields_empty)
             db.session.add(error)
-            db.session.commit()
+            error.errorcreate(fields_empty, commit=True)
     return render_template("login.html", user=current_user)
 
 
@@ -125,24 +119,24 @@ def sign_up():
         # Creation validation logic
         if user:
             flash(acc_exists, category='error')
-            error = Error(error_id=int(random.random()), error_desc=acc_exists)
+            error = Error(error_desc=acc_exists)
             db.session.add(error)
-            db.session.commit()
+            error.errorcreate(acc_exists, commit=True)
         elif len(firstName) < 2:
             flash(gt_1_c, category='error')
-            error = Error(error_id=int(random.random()), error_desc=gt_1_c)
+            error = Error(error_desc=gt_1_c)
             db.session.add(error)
-            db.session.commit()
+            error.errorcreate(gt_1_c, commit=True)
         elif password_one != password_two:  # This compares the two passwords
             flash(mismatch_pw, category='error')
-            error = Error(error_id=int(random.random()), error_desc=mismatch_pw)
+            error = Error(error_desc=mismatch_pw)
             db.session.add(error)
-            db.session.commit()
+            error.errorcreate(mismatch_pw, commit=True)
         elif not pwd_check:
             flash(does_not_meet_reqs, category='error')
-            error = Error(error_id=int(random.random()), error_desc=does_not_meet_reqs)
+            error = Error(error_desc=does_not_meet_reqs)
             db.session.add(error)
-            db.session.commit()
+            error.errorcreate(does_not_meet_reqs, commit=True)
         else:
             # Add user to database
             new_user = User(email=email, firstName=firstName, lastName=lastName,
@@ -170,9 +164,9 @@ def recovery_Page():
         user = User.query.filter_by(email=email).first()
         if not user:
             flash(email_not_found, category='error')
-            error = Error(error_id=int(random.random()), error_desc=email_not_found)
+            error = Error(error_desc=email_not_found)
             db.session.add(error)
-            db.session.commit()
+            error.errorcreate(email_not_found, commit=True)
         else:
             send_recovery(user)
             flash('Recovery email sent!', category='success')
@@ -188,9 +182,9 @@ def reset_password(token):
 
     if not user:
         flash(reset_token_expired, category='error')
-        error = Error(error_id=int(random.random()), error_desc=reset_token_expired)
+        error = Error(error_desc=reset_token_expired)
         db.session.add(error)
-        db.session.commit()
+        error.errorcreate(reset_token_expired, commit=True)
         return redirect(url_for('auth.login'))
 
     password1 = request.form.get('password1')
@@ -202,9 +196,9 @@ def reset_password(token):
 
             if check_password_hash(user.oldPassword, password1):
                 flash(cannot_reuse, category='error')
-                error = Error(error_id=int(random.random()), error_desc=cannot_reuse)
+                error = Error(error_desc=cannot_reuse)
                 db.session.add(error)
-                db.session.commit()
+                error.errorcreate(cannot_reuse, commit=True)
                 return redirect(url_for('auth.reset_password', token=token))
 
             user.reset_password(password1, commit=True)
@@ -212,9 +206,9 @@ def reset_password(token):
             return redirect(url_for('auth.login'))
         else:
             flash(mismatch_pw, category='error')
-            error = Error(error_id=int(random.random()), error_desc=mismatch_pw)
+            error = Error(error_desc=mismatch_pw)
             db.session.add(error)
-            db.session.commit()
+            error.errorcreate(mismatch_pw, commit=True)
 
     return render_template('reset_verified.html', user=current_user)
 
@@ -231,9 +225,9 @@ def adminPort():
         SEARCHID = request.form.get('searchBar')
         if len(SEARCHID) < 1:
             flash(no_blank, category='error')
-            error = Error(error_id=int(random.random()), error_desc=no_blank)
+            error = Error(error_desc=no_blank)
             db.session.add(error)
-            db.session.commit()
+            error.errorcreate(no_blank, commit=True)
             return redirect(url_for('auth.adminPort'))
         else:
             return redirect(url_for('auth.accountOverview'))
@@ -244,9 +238,9 @@ def adminPort():
             return render_template('adminPortal.html', user=current_user, query=User.query.all())
         else:
             flash(no_access, category='error')
-            error = Error(error_id=int(random.random()), error_desc=no_access)
+            error = Error(error_desc=no_access)
             db.session.add(error)
-            db.session.commit()
+            error.errorcreate(no_access, commit=True)
             return redirect(url_for('views.home'))
 
 
@@ -282,9 +276,9 @@ def accountOverview():
 
                 if len(firstName) < 2 or len(lastName) < 2 or len(email) < 1:
                     flash(no_blank, category='error')
-                    error = Error(error_id=int(random.random()), error_desc=no_blank)
+                    error = Error(error_desc=no_blank)
                     db.session.add(error)
-                    db.session.commit()
+                    error.errorcreate(no_blank, commit=True)
                     return redirect(url_for('auth.accountOverview'))
                 else:
                     userName = userNameGenGlobal(firstName, lastName)
@@ -299,10 +293,10 @@ def accountOverview():
                     return redirect(url_for('auth.accountOverview'))
                 else:
                     flash(acc_ufail, category='error')
-                    error = Error(error_id=int(random.random()), error_desc=acc_ufail)
+                    error = Error(error_desc=acc_ufail)
                     db.session.add(error)
-                    db.session.commit()
-                    
+                    error.errorcreate(acc_ufail, commit=True)
+
             #Using exception handling to determine the difference in POST requests. If a better alternative exists. Change ASAP
             except TypeError as err:
                 #flash("TypeError: {0}".format(err), category='error')
@@ -313,9 +307,9 @@ def accountOverview():
 
     else:
         flash(no_access, category='error')
-        error = Error(error_id=int(random.random()), error_desc=no_access)
+        error = Error(error_desc=no_access)
         db.session.add(error)
-        db.session.commit()
+        error.errorcreate(no_access, commit=True)
         return redirect(url_for('views.home'))    
 
     return render_template('accountOverview.html', user=current_user, 
@@ -397,21 +391,16 @@ def help():
     return render_template("help.html", use=current_user)
 
 
-@auth.route('/email_user')
-def e():
-    return render_template("email_user.html", user=current_user)
-
-
 @auth.route('/email_user', methods=['POST','GET'])
 def send_email():
-    user=current_user
+    user = current_user
     a = list()
     f = request.form
     for key in f.keys():
         for value in f.getlist(key):
             a.append(key)
 
-    msg = Message(f'{a[0]}', sender=user.email, recipients=a[2])
+    msg = Message(f'{a[1]}', sender=user.email, recipients=a[0])
     msg.body = a[2]
     msg.html = render_template('email_user.html', user=user)
 
@@ -420,8 +409,9 @@ def send_email():
         mail.send(msg)
     except SMTPAuthenticationError:
         flash(email_error, category='error')
-        error = Error(error_id=int(random.random()), error_desc=email_error)
+        error = Error(error_desc=email_error)
         db.session.add(error)
+        error.errorcreate(email_error, commit=True)
         return render_template('email_user.html', user=user)
 
 

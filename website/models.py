@@ -90,9 +90,6 @@ class User(db.Model, UserMixin):
         if self.hasAdmin and datetime.now() == self.password_expire() - timedelta(days=3):
             return True
 
-
-
-
 class CannotBeDeactivatedError(Exception):
     # Raised when the user cannot be deactivated because they have a ledger balance above 0
     pass
@@ -138,6 +135,7 @@ class Account(db.Model):
 
     # acc_status = db.Column(db.Boolean, default = False)
     # acc_comment = db.Column(db.String(150))
+    acc_ledger = db.relationship('accountledger', backref='acc_id', lazy=True)
 
     def user_balance_above_zero(self):
         if self.init_bal > 0:
@@ -159,17 +157,40 @@ class Account(db.Model):
         return num
 
 
+# An account ledger holds journals
+class AccountLedger(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    journals = db.relationship('journal', backref='entries', lazy=True)
+    acc_num = db.Column(db.Integer, db.ForeignKey('account.acc_num'), nullable=False)
+
+
+# A journal holds ledger entries
+class Journal(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    ledger_entries = db.relationship('ledger', backref='posts', lazy=True)
+    accLed_id = db.Column(db.Integer, db.ForeignKey('accountledger.id'), nullable=False)
+
+
 class Ledger(db.Model):
 
     entry_num = db.Column(db.Integer, primary_key=True)
-    acc_num = db.Column(db.Integer, db.ForeignKey('account.acc_num'), nullable=False)
     entry_desc = db.Column(db.String(150))
     entry_date = db.Column(db.Date())
     entry_bal = db.Column(db.Float)
     entry_cred = db.Column(db.Float)
     entry_deb = db.Column(db.Float)
+    isApproved = db.column(db.Boolean, nullable=False)
+    journal_id = db.Column(db.Integer, db.ForeignKey('journal.id'), nullable=False)
 
     # function to format balances to comma and 2 decimal place. Must pass in a number
     def format_led_balance(self, n):
         num = "{:,.2f}".format(n)
         return num
+
+    # Tells the page not to display unapproved entries into the ledger
+    def do_not_display(self):
+        if not self.isApproved:
+            return True
+        else:
+            return False

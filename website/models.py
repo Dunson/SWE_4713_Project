@@ -29,7 +29,6 @@ class User(db.Model, UserMixin):
     status = db.Column(db.Boolean, default=False)
     creationDate = db.Column(db.Date())
     expirationDate = db.Column(db.Date())
-    suspensionDate = db.Column(db.Date())
     suspensionEnd = db.Column(db.Date())
     accounts = db.relationship("Account", backref="parent")
 

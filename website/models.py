@@ -182,6 +182,7 @@ class Ledger(db.Model):
     entry_deb = db.Column(db.Float)
     isApproved = db.column(db.Boolean, nullable=False, default=False)
     journal_id = db.Column(db.Integer, db.ForeignKey('journal.id'), nullable=False)
+    attachments = db.relationship('attachments', backref='atts', lazy=True)
 
     # function to format balances to comma and 2 decimal place. Must pass in a number
     def format_led_balance(self, n):
@@ -194,3 +195,9 @@ class Ledger(db.Model):
             return True
         else:
             return False
+
+# add attachments to the ledger
+class Attachments(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    attachment = db.Column(db.BLOB, nullable=False)
+    ledger_id = db.Column(db.Integer, db.ForeignKey('ledger.id'), nullable=False)

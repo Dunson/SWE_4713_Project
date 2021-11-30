@@ -415,8 +415,12 @@ def send_email():
         return render_template('email_user.html', user=user)
 
 
+@auth.route('/entry_status', methods=['POST', 'GET'])
+def view_status():
+    return render_template('entry_status.html', user=current_user)
 
-#May not need this method
+
+# May not need this method
 """
 #NEEDS WORK - ROUTING ACCOUNTS TO LEDGER 
 

@@ -70,6 +70,22 @@
                   value="{{query[searchID | int - 1].email}}"
                 />
               </div>
+
+              <form action="#" method="POST">
+              <div class="form-group">
+                <label for="end">Suspension End Date</label>
+                  <input
+                          type="date"
+                          class="form-control"
+                          id="end"
+                          name="suspension-end"
+                          value="suspensionPeriod"
+                          min="2021-01-01"
+                          max="2050-12-1"
+                    />
+                <input type="submit" name="Submit Suspension" value="submitSuspension">
+              </div>
+            </form>
           
               <div class="text-center">
                 <div class="form-check form-check-inline">

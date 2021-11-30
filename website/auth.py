@@ -3,7 +3,7 @@ from smtplib import SMTPAuthenticationError
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from sqlalchemy.orm import query
-from .models import User, Account, Ledger
+from .models import User, Account, Ledger, Error
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db, mail
 from flask_login import login_user, login_required, logout_user, current_user
@@ -62,7 +62,6 @@ def login():
                 flash('Admin login successful!', category='success')
                 login_user(user)
                 return redirect(url_for('auth.adminPort'))
-<<<<<<< HEAD
 
             if check_password_hash(user.password, password):
                 flash('Login Succeful!', category='success')
@@ -461,13 +460,8 @@ def calculate_balance(prev_entry, curr_entry):
 
     return render_template('acc_ledger.html', user = current_user, 
                             led_query = Ledger.query.join(Account).filter(Ledger.acc_num==ACC_ID)) 
-"""
-
-def format_balance(n):
-        num = "{:,.2f}".format(n)
-        return num
-
-    
-    
 
 
+def format_balance(float_variable):
+    formated_float = '{:.2f}'.format(float_variable)
+    return formated_float

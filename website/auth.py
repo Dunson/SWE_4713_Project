@@ -3,7 +3,7 @@ from smtplib import SMTPAuthenticationError
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from sqlalchemy.orm import query
-from .models import User, Account, Ledger, Error
+from .models import User, Account, Ledger
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db, mail
 from flask_login import login_user, login_required, logout_user, current_user
@@ -244,6 +244,24 @@ def adminPort():
             db.session.add(error)
             error.errorcreate(no_access, commit=True)
             return redirect(url_for('views.home'))
+
+#this is the method I made to grab the time from the Admins input on accountOverview. Derick said to build a new route for it but im not so certain it doesnt just go into /accountOverview
+@auth.route('/', methods=['GET', 'POST'])
+@login_required
+def accountSuspension():
+    if request.method == "POST" :
+        if request.form["suspensionPeriod"] < datetime.datetime(datetime.today().strftime('%Y-%m-%d')) :
+            usr_status = User.suspensionEnd = request.form["suspensionPeriod"]
+            User.query().filter(User.username == User.username.data).update({"status": False})
+        else:
+            flash('Your suspension period is today or before today, change to future date')
+
+        #This is the conditional to check if the date has passed and to return the users status to active if so. Not sure where to put this either, tried putting it in the /login but of course that would reactivate deactivated accounts
+        """
+        if User.status == False :
+            if User.suspensionEnd > datetime.datetime(datetime.today().strftime('%Y-%m-%d')) :
+                User.query().filter(User.username == User.username.data).update({"status": True})
+                """
 
 
 @auth.route('/accountOverview', methods=['GET', 'POST'])

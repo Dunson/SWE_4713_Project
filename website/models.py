@@ -1,6 +1,8 @@
 from sqlalchemy.orm import backref
+
 from werkzeug.datastructures import _CacheControl
 from werkzeug.security import generate_password_hash, check_password_hash
+
 from . import db 
 from flask_login import UserMixin
 from sqlalchemy.sql import func
@@ -88,35 +90,52 @@ class User(db.Model, UserMixin):
         if self.hasAdmin and datetime.now() == self.password_expire() - timedelta(days=3):
             return True
 
-    def deactivate_user(self, commit = False):
-        self.status = False
-        if commit:
-            db.session.commit()
-
-
 class CannotBeDeactivatedError(Exception):
     # Raised when the user cannot be deactivated because they have a ledger balance above 0
     pass
 
-class ErrorLog(db.Model):
-    error_id = db.Column(db.Integer, primary_key=True)
 
+class Error(db.Model):
+    __tablename__ = 'errorLog'
+    error_id = db.Column(db.Integer, primary_key=True)
     error_desc = db.Column(db.String(200))
+
+    def __init__(self, error_desc):
+        self.error_desc = error_desc
+
+    def errorcreate(self, error_desc, commit=False):
+
+        self.error_desc = error_desc
+
+        if commit:
+            db.session.commit()
 
 
 class Account(db.Model):
     
-    acc_num = db.Column(db.Integer, primary_key=True)
+    acc_num = db.Column(db.Integer, primary_key=True)  # unique identifier. Needs adjusting
+
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     acc_name = db.Column(db.String(150), unique=True)
     acc_desc = db.Column(db.String(150))
     acc_cat = db.Column(db.String(150))
-
+    # acc_sub_cat = db.Column(db.String(150)
+   
     init_bal = db.Column(db.Float)
+    # acc_bal = db.Column(db.Float)
+    # acc_deb = db.Column(db.Float)
+    # acc_cred = db.Column(db.Float)
 
     acc_statement = db.Column(db.String(150))
-    
+    # acc_order = db.Column(db.Integer)
+
+    # creation_date = db.Column(db.Date())
+    # creation_time = db.Column(db.Time(), nullable = False)
+
+    # acc_status = db.Column(db.Boolean, default = False)
+    # acc_comment = db.Column(db.String(150))
+    acc_ledger = db.relationship('accountledger', backref='acc_id', lazy=True)
 
     def user_balance_above_zero(self):
         if self.init_bal > 0:
@@ -138,41 +157,48 @@ class Account(db.Model):
         return num
 
 
+# An account ledger holds journals
+class AccountLedger(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    journals = db.relationship('journal', backref='entries', lazy=True)
+    acc_num = db.Column(db.Integer, db.ForeignKey('account.acc_num'), nullable=False)
+
+
+# A journal holds ledger entries
+class Journal(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    ledger_entries = db.relationship('ledger', backref='posts', lazy=True)
+    accLed_id = db.Column(db.Integer, db.ForeignKey('accountledger.id'), nullable=False)
+
+
 class Ledger(db.Model):
 
     entry_num = db.Column(db.Integer, primary_key=True)
-    acc_num = db.Column(db.Integer, db.ForeignKey('account.acc_num'), nullable=False)
-
     entry_desc = db.Column(db.String(150))
-
     entry_date = db.Column(db.Date())
-    
     entry_bal = db.Column(db.Float)
     entry_cred = db.Column(db.Float)
     entry_deb = db.Column(db.Float)
+    isApproved = db.column(db.Boolean, nullable=False, default=False)
+    journal_id = db.Column(db.Integer, db.ForeignKey('journal.id'), nullable=False)
+    attachments = db.relationship('attachments', backref='atts', lazy=True)
 
     # function to format balances to comma and 2 decimal place. Must pass in a number
     def format_led_balance(self, n):
         num = "{:,.2f}".format(n)
         return num
 
-    # function to format balances to comma and 2 decimal place. Must pass in a number
-    def format_led_balance(self, n):
-        num = "{:,.2f}".format(n)
-        return num
-
-    def get_entry_num(self):
-        return self.entry_num
-
-    def update_balance(self, balance, commit = False):
-
-        self.entry_bal = balance        
-
-        if commit:
-            db.session.commit()
-
-    
+    # Tells the page not to display unapproved entries into the ledger
+    def do_not_display(self):
+        if not self.isApproved:
+            return True
+        else:
+            return False
 
 
-
-    
+# add attachments to the ledger
+class Attachments(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    attachment = db.Column(db.BLOB, nullable=False)
+    ledger_id = db.Column(db.Integer, db.ForeignKey('ledger.id'), nullable=False)

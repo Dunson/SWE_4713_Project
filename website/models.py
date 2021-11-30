@@ -196,6 +196,7 @@ class Ledger(db.Model):
         else:
             return False
 
+
 # add attachments to the ledger
 class Attachments(db.Model):
     id = db.Column(db.Integer, primary_key=True)

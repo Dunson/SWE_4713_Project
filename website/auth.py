@@ -1,9 +1,9 @@
 from os import error
 from smtplib import SMTPAuthenticationError
-import random
+
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from sqlalchemy.orm import query
-from .models import User, Account, Ledger, Error
+from .models import User, Account, Ledger
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db, mail
 from flask_login import login_user, login_required, logout_user, current_user
@@ -15,6 +15,8 @@ auth = Blueprint('auth', __name__)
 #GLOBAL Variables
 SEARCHID = 'none'
 ACC_ID = 'none'
+LEDGER_NUM = 0
+ATTEMPT_COUNT = 0
 NOW = datetime.now()
 
 # GLOBAL ERROR MESSAGES
@@ -35,6 +37,8 @@ acc_ufail = 'Account Update Failed!'
 exceeded_att = 'You have exceeded maximum login attempts.'
 
 
+def add_err_to_db(err):
+    pass
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -58,6 +62,7 @@ def login():
                 flash('Admin login successful!', category='success')
                 login_user(user)
                 return redirect(url_for('auth.adminPort'))
+<<<<<<< HEAD
 
             if check_password_hash(user.password, password):
                 flash('Login Succeful!', category='success')
@@ -70,24 +75,21 @@ def login():
                 db.session.add(error)
                 error.errorcreate(ipw, commit=True)
 
-            #limits login attempts
-            count = 0
-            while count <3:
-                if check_password_hash(user.password, password):
-                    flash('Login Succeful!', category='success')
-                    login_user(user)
+            # Limits login attempts
+            if check_password_hash(user.password, password):
+                flash('Login Succeful!', category='success')
+                login_user(user)
+                global ATTEMPT_COUNT
+                ATTEMPT_COUNT = 0
+                return redirect(url_for('views.home'))
+            else:
+                flash('Incorrect Password! Attempt: ' + str(ATTEMPT_COUNT), category='error')
+                ATTEMPT_COUNT += 1
 
-                    return redirect(url_for('views.home'))
-                else:
-                    flash(ipw, category='error')
-                    error = Error(error_desc=ipw)
-                    error.errorcreate(ipw, commit=True)
-                    count += 1
-                flash(exceeded_att, category='error')
-                error = Error(error_desc=exceeded_att)
-                error.errorcreate(exceeded_att, commit=True)
-                db.session.add(error)
-                return render_template('reset_verified.html', user=current_user)
+            if ATTEMPT_COUNT > 3:
+                flash('You have exceeded maximum login attempts. Your account has been deactivated.', category='error')
+                User.deactivate_user(user, commit = True)
+                return render_template('login.html', user=current_user)
 
         else:
             flash(fields_empty, category='error')
@@ -235,7 +237,8 @@ def adminPort():
     else:
 
         if current_user.hasAdmin:
-            return render_template('adminPortal.html', user=current_user, query=User.query.all())
+            return render_template('adminPortal.html',
+                                   user=current_user, query=User.query.all())
         else:
             flash(no_access, category='error')
             error = Error(error_desc=no_access)
@@ -310,7 +313,7 @@ def accountOverview():
         error = Error(error_desc=no_access)
         db.session.add(error)
         error.errorcreate(no_access, commit=True)
-        return redirect(url_for('views.home'))    
+        return redirect(url_for('views.home'))
 
     return render_template('accountOverview.html', user=current_user, 
                         query=User.query.all(), searchID=SEARCHID, 
@@ -360,13 +363,32 @@ def view_account():
         entry_cred = request.form.get('entry_cred')
         entry_deb = request.form.get('entry_deb')
 
-        new_entry = Ledger(entry_date=datetime.now(), entry_desc=entry_desc, entry_cred=entry_cred, entry_deb=entry_deb)
+        acc_id = int(ACC_ID)
 
-        
+        init_deb = float(entry_deb)
+        init_cred = float(entry_cred)
+        entry_bal = init_deb - init_cred
 
-        return redirect(url_for('auth.view_account'))
+        new_entry = Ledger(acc_num = acc_id, entry_date=datetime.now(), entry_desc=entry_desc, entry_cred=entry_cred, entry_deb=entry_deb, entry_bal = entry_bal)
+        db.session.add(new_entry)
+        db.session.commit()
 
 
+        prev_entry_num = new_entry.get_entry_num() - 1
+        prev_entry = Ledger.query.filter_by(entry_num = prev_entry_num).first()
+        prev_bal = ''
+        if prev_entry:
+            prev_bal = prev_entry.entry_bal
+
+
+        if new_entry.entry_num == 1:
+            new_entry.update_balance(entry_bal, commit=True)
+        else:
+            new_balance = format_balance(calculate_balance(prev_bal, entry_bal))
+            new_entry.update_balance(new_balance, commit=True)
+
+
+        return redirect(url_for('auth.view_account',legder_num = acc_id))
 
 
     return render_template('accountView.html', user = current_user, acc_ID = ACC_ID, 
@@ -374,7 +396,7 @@ def view_account():
                         led_query = Ledger.query.join(Account).filter(Ledger.acc_num==ACC_ID))
 
 
-# Username generator
+#Username generator
 def userNameGenGlobal(first, last):
     currMonth = str(datetime.now().month)
     currYear = str(datetime.now().year)
@@ -385,11 +407,13 @@ def userNameGenGlobal(first, last):
     userName = first[0] + last + currMonth + currYear[2] + currYear[3]
     return userName
 
-
 @auth.route('/help')
 def help():
-    return render_template("help.html", use=current_user)
+    return render_template("help.html", user=current_user)
 
+@auth.route('/email_user')
+def e():
+    return render_template("email_user.html", user=current_user)
 
 @auth.route('/email_user', methods=['POST','GET'])
 def send_email():
@@ -414,26 +438,36 @@ def send_email():
         error.errorcreate(email_error, commit=True)
         return render_template('email_user.html', user=user)
 
+# --Tools---
 
-@auth.route('/entry_status', methods=['POST', 'GET'])
-def view_status():
-    return render_template('entry_status.html', user=current_user)
+# Username generator
+def userNameGenGlobal(first, last):
+    currMonth = str(datetime.now().month)
+    currYear = str(datetime.now().year)
+
+    if len(currMonth) < 2:
+        currMonth = '0' + currMonth
+
+    userName = first[0] + last + currMonth + currYear[2] + currYear[3]
+    return userName
+
+def update_log_attempt(count):
+    count +=1
+    return count
 
 
-# May not need this method
-"""
-#NEEDS WORK - ROUTING ACCOUNTS TO LEDGER 
-
-@auth.route('/account_ledger', methods = ['GET', 'POST'])
-@login_required
-def account_ledger():
-    
-   
+def calculate_balance(prev_entry, curr_entry):
+    return prev_entry + curr_entry
 
     return render_template('acc_ledger.html', user = current_user, 
                             led_query = Ledger.query.join(Account).filter(Ledger.acc_num==ACC_ID)) 
 """
 
+def format_balance(n):
+        num = "{:,.2f}".format(n)
+        return num
+
     
     
+
 

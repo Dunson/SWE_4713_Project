@@ -224,7 +224,7 @@ def adminPort():
     if request.method == 'POST':
         global SEARCHID
         SEARCHID = request.form.get('searchBar')
-        if len(SEARCHID) < 1:
+        if SEARCHID == None or len(SEARCHID) < 1:
             flash(no_blank, category='error')
             error = Error(error_desc=no_blank)
             db.session.add(error)
@@ -246,7 +246,7 @@ def adminPort():
             return redirect(url_for('views.home'))
 
 
-@auth.route('/accountOverview', methods=['GET', 'POST'])
+@auth.route('/accountOverview/', methods=['GET', 'POST'])
 @login_required
 def accountOverview():
 
@@ -255,8 +255,11 @@ def accountOverview():
         usr_status = False
         usr_hasMan = False
         usr_hasAdmin = False
+        req = request.form
 
-        qID = int(SEARCHID)
+        print(req.get("accOv"))
+
+        qID = SEARCHID
         user_to_update = User.query.filter_by(id=qID).first()
 
         if request.method == 'POST':
@@ -351,7 +354,8 @@ def newChart():
 
 
 
-@auth.route('/viewAccount', methods = ['GET', 'POST'])
+
+@auth.route('/accountView/', methods = ['GET', 'POST'])
 @login_required
 def view_account():
 
@@ -393,9 +397,10 @@ def view_account():
         return redirect(url_for('auth.view_account',legder_num = acc_id))
 
 
-    return render_template('accountView.html', user = current_user, acc_ID = ACC_ID, 
+    return render_template('accountView.html', user = current_user, acc_ID = ACC_ID,
                         acc_query = Account.query.join(User).filter(Account.user_id==SEARCHID),
                         led_query = Ledger.query.join(Account).filter(Ledger.acc_num==ACC_ID))
+
 
 
 #Username generator
@@ -462,10 +467,18 @@ def send_email():
 @auth.route('/approvals', methods=['GET','POST'])
 def approve():
     user=current_user
-    return render_template('approvals.html', user=user)
+    req =request.form
+
+    if request.method == "POST":
+        if req.get("approve"):
+            print("x")
+        elif req.get("reject"):
+            print("reject")
+    return render_template('approvals.html', user=user, ledgerq=Ledger.query.filter_by(isApproved='Pending'),
+                           rejected_entries=Ledger.query.filter_by(isApproved='Rejected'))
 
 
-@auth.route('/acc_ledger/<id>', methods=['GET','POST'])
+@auth.route('/acc_ledger/<id>', methods=['GET', 'POST'])
 def accl (id):
     id = User.id
     return render_template('acc_ledger.html', user=current_user, journal_query=Journal.query.join(Account),

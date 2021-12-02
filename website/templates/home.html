@@ -24,6 +24,7 @@
         width: 500px;
     }
 
+
 </style>
 
 <!--Contianer for profile/calender at top left of screen-->
@@ -63,6 +64,7 @@
                 <th scope="col">Description</th>
                 <th scope="col">Type</th>
                 <th scope="col">Statement</th>
+                <th scope="col">Link</th>
               </tr>
             </thead>
             <tbody style="overflow-y: scroll;">
@@ -73,6 +75,7 @@
                 <td>{{account.acc_desc}}</td>
                 <td>{{account.acc_cat}}</td>
                 <td>{{account.acc_statement}}</td>
+                <td><a href="/accountView/{{user.id}}" class="link-info">View Account</a></td>
               </tr>
               {% endfor %}
             </tbody>

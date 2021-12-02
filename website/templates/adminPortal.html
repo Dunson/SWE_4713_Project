@@ -62,7 +62,13 @@ content%}
           {% else %}
           <td style="color: red">Deactivated</td>
           {% endif %}
-          <td><a href="/acc_ledger/{{user}}" class="link-info">View Account</a></td>
+            <td>
+                <form method="POST">
+                    <button type="submit" class="btn btn-outline-light" value="{{ user.id }}">
+                        <a href="{{ url_for('auth.accountOverview') }}" >View Account</a>
+                    </button>
+                </form>
+            </td>
         </tr>
         {% endfor %}
       </tbody>

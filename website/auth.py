@@ -316,7 +316,9 @@ def accountOverview(id):
                 ACC_ID = request.form.get('searchBar')
                 if ACC_ID:
                     return redirect(url_for('auth.view_account', id = ACC_ID)) 
-                return redirect(url_for('auth.view_account', id = id))
+
+                account_number = request.form.get("get_account")
+                return redirect(url_for('auth.view_account', id = int(account_number)))
 
     else:
         flash(no_access, category='error')
@@ -365,7 +367,7 @@ def newChart(id):
 @auth.route('/accountView/<id>', methods = ['GET', 'POST'])
 @login_required
 def view_account(id):
-    #id = Account.acc_num
+    # id = Account.acc_num
 
     #POST request to add entry into ledger--
 
@@ -374,7 +376,8 @@ def view_account(id):
         entry_cred = request.form.get('entry_cred')
         entry_deb = request.form.get('entry_deb')
         journal_id = 3 # set to 3
-
+         
+        #account.user_journals
 
         acc_ID = id # set to one by default until we fix html page
 

@@ -185,6 +185,9 @@ class Ledger(db.Model):
         if commit:
             commit=True
 
+    def get_entry_num(self):
+        return self.entry_num
+
 
 # add attachments to the ledger
 class Attachments(db.Model):

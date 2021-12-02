@@ -163,6 +163,16 @@
           <td>{{account.acc_desc}}</td>
           <td>{{account.acc_cat}}</td>
           <td>{{account.acc_statement}}</td>
+
+          <td>
+            <form method="POST" >
+                <button type="submit" name = "get_account" class="btn btn-success" value="{{ account.acc_num }}">
+                    View Account
+                </button>
+            </form>
+        </td>
+        
+        
         </tr>
         {% endfor %}
       </tbody>

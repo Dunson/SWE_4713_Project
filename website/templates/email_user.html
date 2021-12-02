@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% extends "base.html" %} {% block title %} Email User {% endblock %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Email User</title>
+    <h1>Email A User</h1>
+</head>
+<body>
+<form name="emailform" class="form-group" id="emailform" method="POST">
+    <div class="mb-3">
+  <label for="exampleFormControlInput1" class="form-label">Email address</label>
+  <input name="e" type="email" class="form-control" id="email" placeholder="name@example.com">
+</div>
+       <div class="mb-3">
+  <label for="exampleFormControlInput1" class="form-label">Subject</label>
+  <input name= "s" type="text" class="form-control" id="subject" placeholder="subject">
+</div>
+<div class="mb-3">
+  <label for="exampleFormControlTextarea1" class="form-label">Body</label>
+  <textarea class="form-control" name="b" id="body" rows="3"></textarea>
+</div>
+<div>
+    <button name="submitbutton" type="submit" class="btn btn-primary btn-block">Send Email</button>
+</div>
+</form>
+</body>
+</html>
+
+{% endblock %}

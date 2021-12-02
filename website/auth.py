@@ -3,7 +3,7 @@ from smtplib import SMTPAuthenticationError
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from sqlalchemy.orm import query
-from .models import User, Account, Ledger, Error
+from .models import User, Account, Ledger, Error, Journal, Attachments
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db, mail
 from flask_login import login_user, login_required, logout_user, current_user
@@ -361,6 +361,7 @@ def view_account():
         entry_desc = request.form.get('entry_desc')
         entry_cred = request.form.get('entry_cred')
         entry_deb = request.form.get('entry_deb')
+        journal_id = 1
 
         acc_id = int(ACC_ID)
 
@@ -368,7 +369,9 @@ def view_account():
         init_cred = float(entry_cred)
         entry_bal = init_deb - init_cred
 
-        new_entry = Ledger(acc_num = acc_id, entry_date=datetime.now(), entry_desc=entry_desc, entry_cred=entry_cred, entry_deb=entry_deb, entry_bal = entry_bal)
+        new_entry = Ledger(acc_num=acc_id, entry_date=datetime.now(), entry_desc=entry_desc,
+                           entry_cred=entry_cred, entry_deb=entry_deb, entry_bal=entry_bal,
+                           isApproved='Pending', journal_id=journal_id)
         db.session.add(new_entry)
         db.session.commit()
 
@@ -406,36 +409,67 @@ def userNameGenGlobal(first, last):
     userName = first[0] + last + currMonth + currYear[2] + currYear[3]
     return userName
 
+
+@auth.route('/home')
+def homepage():
+    return render_template("home.html", user=current_user, acc_query = Account.query.join(User))
+
+
 @auth.route('/help')
 def help():
     return render_template("help.html", user=current_user)
+
 
 @auth.route('/email_user')
 def e():
     return render_template("email_user.html", user=current_user)
 
-@auth.route('/email_user', methods=['POST','GET'])
-def send_email():
-    user = current_user
-    a = list()
-    f = request.form
-    for key in f.keys():
-        for value in f.getlist(key):
-            a.append(key)
+@auth.route('/prepare_entries')
+def pe():
+    return render_template("prepare_entries.html", user=current_user)
 
-    msg = Message(f'{a[1]}', sender=user.email, recipients=a[0])
-    msg.body = a[2]
-    msg.html = render_template('email_user.html', user=user)
+
+@auth.route('/email_user', methods=['POST', 'GET'])
+def send_email():
+
+    if request.method == 'POST':
+        user = current_user
+        req = request.form
+        e = req.get("e")
+        s = req.get("s")
+        b = req.get("b")
+
+        print(e,s,b)
+
+        msg = Message(f'{s}', sender=user.email, recipients=e)
+        msg.body = b
+        msg.html = render_template('email_user.html', user=user)
 
     # there is an SMTP auth error here, Brandon you probably need to update your credentials
-    try:
-        mail.send(msg)
-    except SMTPAuthenticationError:
-        flash(email_error, category='error')
-        error = Error(error_desc=email_error)
-        db.session.add(error)
-        error.errorcreate(email_error, commit=True)
-        return render_template('email_user.html', user=user)
+
+        try:
+            mail.send(msg)
+        except SMTPAuthenticationError:
+            flash(email_error, category='error')
+            error = Error(error_desc=email_error)
+            db.session.add(error)
+            error.errorcreate(email_error, commit=True)
+            flash("Emaill successfully sent, you may leave this page or send more emails.", category='Success')
+            return render_template('email_user.html', user=user)
+
+    return render_template('email_user.html', user=user)
+
+@auth.route('/approvals', methods=['GET','POST'])
+def approve():
+    user=current_user
+    return render_template('approvals.html', user=user)
+
+
+@auth.route('/acc_ledger/<id>', methods=['GET','POST'])
+def accl (id):
+    id = User.id
+    return render_template('acc_ledger.html', user=current_user, journal_query=Journal.query.join(Account),
+                           accl_query=Ledger.query.join(Journal), att_query=Attachments.query.join(Ledger))
 
 # --Tools---
 
@@ -457,10 +491,6 @@ def update_log_attempt(count):
 
 def calculate_balance(prev_entry, curr_entry):
     return prev_entry + curr_entry
-
-    return render_template('acc_ledger.html', user = current_user, 
-                            led_query = Ledger.query.join(Account).filter(Ledger.acc_num==ACC_ID)) 
-
 
 def format_balance(float_variable):
     formated_float = '{:.2f}'.format(float_variable)

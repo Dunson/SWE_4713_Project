@@ -5,6 +5,7 @@ from werkzeug.utils import redirect
 from .models import User, Account, Ledger
 from .auth import ACC_ID
 
+
 views = Blueprint('views', __name__)
 
 @views.route('/', methods =['GET', 'POST'])
@@ -16,8 +17,4 @@ def home():
         ACC_ID = request.form.get('searchBar')
         return redirect(url_for('auth.view_account'))
 
-    return render_template("home.html", user = current_user, 
-                    acc_query = Account.query.join(User).filter(Account.user_id==current_user.id),
-                    led_query = Ledger.query.join(Account).filter(Ledger.acc_num==ACC_ID))
-
-
+    return render_template("home.html", user=current_user,  acc_query=Account.query.join(User))

@@ -31,7 +31,7 @@ class User(db.Model, UserMixin):
     expirationDate = db.Column(db.Date())
     suspensionDate = db.Column(db.Date())
     suspensionEnd = db.Column(db.Date())
-    accounts = db.relationship("Account", backref="parent")
+    accounts = db.relationship("Account", backref="user_backref", lazy=True)
 
     def reset_password(self, password, commit=False):
         self.oldPassword = self.password
@@ -53,7 +53,6 @@ class User(db.Model, UserMixin):
             print(e)
             return
         return User.query.filter_by(email=email).first()
-
 
     # Method for password validation
     def password_check(self, password, passwd2): 
@@ -114,8 +113,7 @@ class Error(db.Model):
 class Account(db.Model):
     
     acc_num = db.Column(db.Integer, primary_key=True)  # unique identifier. Needs adjusting
-
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
 
     acc_name = db.Column(db.String(150), unique=True)
     acc_desc = db.Column(db.String(150))
@@ -135,7 +133,7 @@ class Account(db.Model):
 
     # acc_status = db.Column(db.Boolean, default = False)
     # acc_comment = db.Column(db.String(150))
-    acc_ledger = db.relationship('accountledger', backref='acc_id', lazy=True)
+    db.relationship('Journal', backref='user_journals')
 
     def user_balance_above_zero(self):
         if self.init_bal > 0:
@@ -157,19 +155,12 @@ class Account(db.Model):
         return num
 
 
-# An account ledger holds journals
-class AccountLedger(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    journals = db.relationship('journal', backref='entries', lazy=True)
-    acc_num = db.Column(db.Integer, db.ForeignKey('account.acc_num'), nullable=False)
-
-
 # A journal holds ledger entries
 class Journal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.now)
-    ledger_entries = db.relationship('ledger', backref='posts', lazy=True)
-    accLed_id = db.Column(db.Integer, db.ForeignKey('accountledger.id'), nullable=False)
+    ledger_entries = db.relationship('Ledger', backref='entries')
+    assoc_acc = db.Column(db.Integer, db.ForeignKey('account.acc_num'))
 
 
 class Ledger(db.Model):
@@ -180,9 +171,11 @@ class Ledger(db.Model):
     entry_bal = db.Column(db.Float)
     entry_cred = db.Column(db.Float)
     entry_deb = db.Column(db.Float)
-    isApproved = db.column(db.Boolean, nullable=False, default=False)
-    journal_id = db.Column(db.Integer, db.ForeignKey('journal.id'), nullable=False)
-    attachments = db.relationship('attachments', backref='atts', lazy=True)
+    isApproved = db.Column(db.String(25), nullable=False, default="Pending")
+    journal_id = db.Column(db.Integer, db.ForeignKey('journal.id'))
+    acc_num = db.Column(db.Integer, db.ForeignKey('account.acc_num'))
+    attaches = db.relationship('Attachments', backref='atts')
+
 
     # function to format balances to comma and 2 decimal place. Must pass in a number
     def format_led_balance(self, n):
@@ -191,7 +184,7 @@ class Ledger(db.Model):
 
     # Tells the page not to display unapproved entries into the ledger
     def do_not_display(self):
-        if not self.isApproved:
+        if self.isApproved == 'Pending' or self.isApproved == 'Not Approved':
             return True
         else:
             return False
@@ -201,4 +194,4 @@ class Ledger(db.Model):
 class Attachments(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     attachment = db.Column(db.BLOB, nullable=False)
-    ledger_id = db.Column(db.Integer, db.ForeignKey('ledger.id'), nullable=False)
+    ledger_id = db.Column(db.Integer, db.ForeignKey('ledger.entry_num'))

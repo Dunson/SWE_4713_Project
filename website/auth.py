@@ -3,7 +3,7 @@ from smtplib import SMTPAuthenticationError
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from sqlalchemy.orm import query
-from .models import User, Account, Ledger
+from .models import User, Account, Ledger, Error, Journal, Attachments
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db, mail
 from flask_login import login_user, login_required, logout_user, current_user
@@ -224,7 +224,7 @@ def adminPort():
     if request.method == 'POST':
         global SEARCHID
         SEARCHID = request.form.get('searchBar')
-        if len(SEARCHID) < 1:
+        if SEARCHID == None or len(SEARCHID) < 1:
             flash(no_blank, category='error')
             error = Error(error_desc=no_blank)
             db.session.add(error)
@@ -245,26 +245,8 @@ def adminPort():
             error.errorcreate(no_access, commit=True)
             return redirect(url_for('views.home'))
 
-#this is the method I made to grab the time from the Admins input on accountOverview. Derick said to build a new route for it but im not so certain it doesnt just go into /accountOverview
-@auth.route('/', methods=['GET', 'POST'])
-@login_required
-def accountSuspension():
-    if request.method == "POST" :
-        if request.form["suspensionPeriod"] < datetime.datetime(datetime.today().strftime('%Y-%m-%d')) :
-            usr_status = User.suspensionEnd = request.form["suspensionPeriod"]
-            User.query().filter(User.username == User.username.data).update({"status": False})
-        else:
-            flash('Your suspension period is today or before today, change to future date')
 
-        #This is the conditional to check if the date has passed and to return the users status to active if so. Not sure where to put this either, tried putting it in the /login but of course that would reactivate deactivated accounts
-        """
-        if User.status == False :
-            if User.suspensionEnd > datetime.datetime(datetime.today().strftime('%Y-%m-%d')) :
-                User.query().filter(User.username == User.username.data).update({"status": True})
-                """
-
-
-@auth.route('/accountOverview', methods=['GET', 'POST'])
+@auth.route('/accountOverview/', methods=['GET', 'POST'])
 @login_required
 def accountOverview():
 
@@ -273,8 +255,11 @@ def accountOverview():
         usr_status = False
         usr_hasMan = False
         usr_hasAdmin = False
+        req = request.form
 
-        qID = int(SEARCHID)
+        print(req.get("accOv"))
+
+        qID = SEARCHID
         user_to_update = User.query.filter_by(id=qID).first()
 
         if request.method == 'POST':
@@ -369,7 +354,8 @@ def newChart():
 
 
 
-@auth.route('/viewAccount', methods = ['GET', 'POST'])
+
+@auth.route('/accountView/', methods = ['GET', 'POST'])
 @login_required
 def view_account():
 
@@ -379,6 +365,7 @@ def view_account():
         entry_desc = request.form.get('entry_desc')
         entry_cred = request.form.get('entry_cred')
         entry_deb = request.form.get('entry_deb')
+        journal_id = 1
 
         acc_id = int(ACC_ID)
 
@@ -386,7 +373,9 @@ def view_account():
         init_cred = float(entry_cred)
         entry_bal = init_deb - init_cred
 
-        new_entry = Ledger(acc_num = acc_id, entry_date=datetime.now(), entry_desc=entry_desc, entry_cred=entry_cred, entry_deb=entry_deb, entry_bal = entry_bal)
+        new_entry = Ledger(acc_num=acc_id, entry_date=datetime.now(), entry_desc=entry_desc,
+                           entry_cred=entry_cred, entry_deb=entry_deb, entry_bal=entry_bal,
+                           isApproved='Pending', journal_id=journal_id)
         db.session.add(new_entry)
         db.session.commit()
 
@@ -408,9 +397,10 @@ def view_account():
         return redirect(url_for('auth.view_account',legder_num = acc_id))
 
 
-    return render_template('accountView.html', user = current_user, acc_ID = ACC_ID, 
+    return render_template('accountView.html', user = current_user, acc_ID = ACC_ID,
                         acc_query = Account.query.join(User).filter(Account.user_id==SEARCHID),
                         led_query = Ledger.query.join(Account).filter(Ledger.acc_num==ACC_ID))
+
 
 
 #Username generator
@@ -424,36 +414,75 @@ def userNameGenGlobal(first, last):
     userName = first[0] + last + currMonth + currYear[2] + currYear[3]
     return userName
 
+
+@auth.route('/home')
+def homepage():
+    return render_template("home.html", user=current_user, acc_query = Account.query.join(User))
+
+
 @auth.route('/help')
 def help():
     return render_template("help.html", user=current_user)
+
 
 @auth.route('/email_user')
 def e():
     return render_template("email_user.html", user=current_user)
 
-@auth.route('/email_user', methods=['POST','GET'])
-def send_email():
-    user = current_user
-    a = list()
-    f = request.form
-    for key in f.keys():
-        for value in f.getlist(key):
-            a.append(key)
+@auth.route('/prepare_entries')
+def pe():
+    return render_template("prepare_entries.html", user=current_user)
 
-    msg = Message(f'{a[1]}', sender=user.email, recipients=a[0])
-    msg.body = a[2]
-    msg.html = render_template('email_user.html', user=user)
+
+@auth.route('/email_user', methods=['POST', 'GET'])
+def send_email():
+
+    if request.method == 'POST':
+        user = current_user
+        req = request.form
+        e = req.get("e")
+        s = req.get("s")
+        b = req.get("b")
+
+        print(e,s,b)
+
+        msg = Message(f'{s}', sender=user.email, recipients=e)
+        msg.body = b
+        msg.html = render_template('email_user.html', user=user)
 
     # there is an SMTP auth error here, Brandon you probably need to update your credentials
-    try:
-        mail.send(msg)
-    except SMTPAuthenticationError:
-        flash(email_error, category='error')
-        error = Error(error_desc=email_error)
-        db.session.add(error)
-        error.errorcreate(email_error, commit=True)
-        return render_template('email_user.html', user=user)
+
+        try:
+            mail.send(msg)
+        except SMTPAuthenticationError:
+            flash(email_error, category='error')
+            error = Error(error_desc=email_error)
+            db.session.add(error)
+            error.errorcreate(email_error, commit=True)
+            flash("Emaill successfully sent, you may leave this page or send more emails.", category='Success')
+            return render_template('email_user.html', user=user)
+
+    return render_template('email_user.html', user=user)
+
+@auth.route('/approvals', methods=['GET','POST'])
+def approve():
+    user=current_user
+    req =request.form
+
+    if request.method == "POST":
+        if req.get("approve"):
+            print("x")
+        elif req.get("reject"):
+            print("reject")
+    return render_template('approvals.html', user=user, ledgerq=Ledger.query.filter_by(isApproved='Pending'),
+                           rejected_entries=Ledger.query.filter_by(isApproved='Rejected'))
+
+
+@auth.route('/acc_ledger/<id>', methods=['GET', 'POST'])
+def accl (id):
+    id = User.id
+    return render_template('acc_ledger.html', user=current_user, journal_query=Journal.query.join(Account),
+                           accl_query=Ledger.query.join(Journal), att_query=Attachments.query.join(Ledger))
 
 # --Tools---
 
@@ -475,10 +504,6 @@ def update_log_attempt(count):
 
 def calculate_balance(prev_entry, curr_entry):
     return prev_entry + curr_entry
-
-    return render_template('acc_ledger.html', user = current_user, 
-                            led_query = Ledger.query.join(Account).filter(Ledger.acc_num==ACC_ID)) 
-
 
 def format_balance(float_variable):
     formated_float = '{:.2f}'.format(float_variable)

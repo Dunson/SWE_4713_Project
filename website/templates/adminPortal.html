@@ -3,22 +3,22 @@ content%}
 <h1 class="text-center">Admin Dashboard</h1>
 <br />
 
+</div>
+<div class="container px-3 py-1 pb-4">
 
-<div class="container-fluid px-3 py-1 pb-4">
-  
     <form class="form-inline" method="POST">
-      <h2 class="text-dark pt-2">User Accounts</h2>
+      <h2 class="text-dark pt-2">Users</h2>
         <div class="ml-auto">
           <input type="search" name="searchBar" class="form-control pr-1" placeholder="Search by ID#"
             list = "userData" />
-          
-            <datalist id="userData"> 
+
+            <datalist id="userData">
               {% for user in query %}
               <option name="userIndex" value="{{query[loop.index - 1].id}}">{{user.id}}</option>
               {% endfor %}
-            </datalist>  
+            </datalist>
             <button class="btn btn-success" type="submit">Search</button>
-        </div>  
+        </div>
     </form>
 
   <div>
@@ -33,6 +33,7 @@ content%}
           <th>Type</th>
           <th>Date Created</th>
           <th>Status</th>
+          <th>Link</th>
         </tr>
       </thead>
 
@@ -44,7 +45,8 @@ content%}
           <td>{{user.lastName}}</td>
           <td>{{user.email}}</td>
           <td>{{user.userName}}</td>
-  
+
+
           {% if user.hasAdmin%}
           <td>Administrator</td>
           {% elif user.hasMan %}
@@ -52,21 +54,26 @@ content%}
           {% else %}
           <td>User</td>
           {% endif %}
-  
+
           <td>{{user.creationDate}}</td>
-  
+
           {% if user.status %}
           <td style="color: green">Activated</td>
           {% else %}
           <td style="color: red">Deactivated</td>
           {% endif %}
+            <td>
+                <form method="POST">
+                    <button type="submit" class="btn btn-outline-light" value="{{ user.id }}">
+                        <a href="{{ url_for('auth.accountOverview') }}" >View Account</a>
+                    </button>
+                </form>
+            </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-
-  <br>
 
 </div>
 

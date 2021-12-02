@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% extends "base.html" %} {% block title %} Approvals {% endblock %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Approvals</title>
+</head>
+<body>
+    <div class="container-fluid px-3 py-1 pb-4">
+
+    <form class="form-inline" method="POST">
+      <h2 class="text-dark pt-2">Pending Ledger Entries</h2>
+    </form>
+
+  <div>
+    <table class="table table-striped table-dark">
+      <thead style="position: sticky;">
+        <tr>
+          <th>Account Number</th>
+          <th>Entry Number</th>
+          <th>Credited</th>
+          <th>Debited</th>
+          <th>Balance</th>
+          <th>Date Created</th>
+          <th>Description</th>
+          <th>Approval Status</th>
+          <th>Approve</th>
+          <th>Reject</th>
+        </tr>
+      </thead>
+
+      <tbody style="overflow-y: scroll;">
+        {% for ledger in ledgerq %}
+        <tr>
+          <td id="acc_num">{{ledger.acc_num}}</td>
+          <td id="entry_num">{{ledger.entry_num}}</td>
+          <td id="entry_cred">{{ledger.entry_cred}}</td>
+          <td id="entry_deb">{{ledger.entry_deb}}</td>
+          <td id="entry_bal">{{ledger.entry_bal}}</td>
+          <td id="entry_date">{{ledger.entry_date}}</td>
+          <td id="entry_desc">{{ledger.entry_desc}}</td>
+          {% if ledger.isApproved == 'Pending' %}
+          <td style="color: yellow">Pending</td>
+          {% else %}
+          <td style="color: red">Rejected</td>
+          {% endif %}
+          <td><form method="post"><button name="approve" type="submit" class="btn btn-success">Approve</button></form></td>
+        <td><form method="post"><button name="reject" type="submit" class="btn btn-danger" >Reject</button></form></td>
+        </tr>
+        {% endfor %}
+
+      </tbody>
+    </table>
+  </div>
+
+
+  <br>
+
+</div>
+
+    <div class="container-fluid px-3 py-1 pb-4">
+
+    <form class="form-inline" method="POST">
+      <h2 class="text-dark pt-2">Rejected Ledger Entries</h2>
+    </form>
+
+  <div>
+    <table class="table table-striped table-dark">
+      <thead style="position: sticky;">
+        <tr>
+          <th>Account Number</th>
+          <th>Entry Number</th>
+          <th>Credited</th>
+          <th>Debited</th>
+          <th>Balance</th>
+          <th>Date Created</th>
+          <th>Description</th>
+          <th>Approval Status</th>
+          <th>Change Status</th>
+        </tr>
+      </thead>
+
+      <tbody style="overflow-y: scroll;">
+        {% for x in rejected_entries %}
+        <tr>
+          <td id="acc_num">{{x.acc_num}}</td>
+          <td id="entry_num">{{x.entry_num}}</td>
+          <td id="entry_cred">{{x.entry_cred}}</td>
+          <td id="entry_deb">{{x.entry_deb}}</td>
+          <td id="entry_bal">{{x.entry_bal}}</td>
+          <td id="entry_date">{{x.entry_date}}</td>
+          <td id="entry_desc">{{x.entry_desc}}</td>
+          {% if x.isApproved == 'Pending' %}
+          <td style="color: yellow">Pending</td>
+          {% else %}
+          <td style="color: red">Rejected</td>
+          {% endif %}
+          <td><form method="post"><button name="reverse" type="submit" class="btn btn-warning">Change Status</button></form></td>
+        </tr>
+        {% endfor %}
+
+      </tbody>
+    </table>
+  </div>
+
+  <br>
+
+</div>
+
+
+</body>
+
+{% endblock %}
+</html>

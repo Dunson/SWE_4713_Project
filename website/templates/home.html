@@ -24,6 +24,7 @@
         width: 500px;
     }
 
+
 </style>
 
 <!--Contianer for profile/calender at top left of screen-->
@@ -31,7 +32,7 @@
 <div class="prof-container">
     <h3 class="pl-2 text-center"> Welcome back, {{current_user.firstName}}</h3>
     
-    <p class=" text-center pl-2">Calender</p>
+    <p class=" text-center pl-2">Calendar</p>
     <div class="cal">
         <iframe src="https://calendar.google.com/calendar/embed?height=500&wkst=1&bgcolor=%23ffffff&ctz=America%2FNew_York&title=Account%20Calander&showTitle=0&showNav=0&showPrint=0&showTabs=0&showCalendars=0&src=aGo0aDBzYnVza3BxcmtwcjhncG91dG9qczhAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&color=%23F4511E" 
             style="border-width:0" width="300" height="300" frameborder="0" scrolling="no">
@@ -63,6 +64,7 @@
                 <th scope="col">Description</th>
                 <th scope="col">Type</th>
                 <th scope="col">Statement</th>
+                <th scope="col">Link</th>
               </tr>
             </thead>
             <tbody style="overflow-y: scroll;">
@@ -73,6 +75,7 @@
                 <td>{{account.acc_desc}}</td>
                 <td>{{account.acc_cat}}</td>
                 <td>{{account.acc_statement}}</td>
+                <td><a href="/accountView/{{user.id}}" class="link-info">View Account</a></td>
               </tr>
               {% endfor %}
             </tbody>

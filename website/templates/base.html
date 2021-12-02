@@ -54,10 +54,32 @@
                     
                 </style>
 
+                    {% if not user.hasAdmin and not user.hasMan %}
+                        <li class = "nav-item">
+                    <a class = "nav-link text-light text-center" id = "homepage" href="/home">Home</a>
+                        </li>
+                        <li class = "nav-item">
+                        <a class = "nav-link text-light text-center" id ="prepare_entries" href="/prepare_entries">Prepare Entries</a>
+                        </li>
+                        {% endif %}
+
                 {% if user.hasAdmin %}
+                <li class = "nav-item">
+                    <a class = "nav-link text-light text-center" id = "homepage" href="/home">Home</a>
+                 </li>
                 <li class = "nav-item">
                     <a class = "nav-link text-light text-center" id = "adminPort" href="/adminPortal">Admin Dashboard</a>
                 </li>
+                    <li class = "nav-item">
+                        <a class = "nav-link text-light text-center" id ="prepare_entries" href="/prepare_entries">Prepare Entries</a>
+                    </li>
+                 <li class = "nav-item">
+                    <a class = "nav-link text-light text-center" id = "emailuser" href="/email_user">Email User</a>
+                 </li>
+                 <li class = "nav-item">
+                    <a class = "nav-link text-light text-center" id = "approvals" href="/approvals">Approvals</a>
+                 </li>
+
                 {% endif %}
 
                 <li class="nav-item dropdown">

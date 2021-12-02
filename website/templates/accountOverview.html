@@ -1,4 +1,4 @@
-{% extends "base.html" %} 
+{% extends "base.html" %}
 {% block title %} Account Overview {% endblock %}
 
 {%block content%}
@@ -7,7 +7,7 @@
     <h3 class="text-center text-dark">User Information</h3>
     <div class=" container bg-dark text-light pl-2">
       <p>Name: {{query[searchID | int - 1].firstName}}  {{query[searchID | int - 1].lastName}}
-        <br> 
+        <br>
         Email: {{query[searchID | int - 1].email}}
         <br>
         Status: {% if query[searchID | int - 1].status == True %} Activated {% else %} Deactivated {% endif %}
@@ -15,13 +15,13 @@
         Type: {% if query[searchID | int - 1].hasAdmin %} Admininstrator {% elif query[searchID | int - 1].hasMan%} Manager {% else %} User {% endif %}
       </p>
     </div>
-  
+
     <div class="text-center">
       <button type="button" class="btn btn-success" data-toggle="modal" data-target="#editaccountmodal">
         Edit
       </button>
     </div>
-    
+
     <div class="modal fade" id="editaccountmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -59,7 +59,7 @@
                   </div>
                 </div>
               </div>
-          
+
               <div class="form-group">
                 <label for="email">Email Address</label>
                 <input
@@ -70,7 +70,7 @@
                   value="{{query[searchID | int - 1].email}}"
                 />
               </div>
-          
+
               <div class="text-center">
                 <div class="form-check form-check-inline">
                   <input name = "activeButton" class="form-check-input" type="radio"
@@ -80,7 +80,7 @@
                     >Activated</label
                   >
                 </div>
-          
+
                 <div class="form-check form-check-inline">
                   <input class="form-check-input" type="radio" id="inlineRadioOptions2"
                   onclick="fixDeactive(); return true;" {% if query[searchID | int -
@@ -90,7 +90,7 @@
                   >
                 </div>
               </div>
-          
+
               <div class="text-center">
                 <div class="form-check form-check-inline">
                   <input name = "usrButton" class="form-check-input" type="radio"
@@ -99,14 +99,14 @@
                   1].hasAdmin == False) %} checked {% endif %}/>
                   <label class="form-check-label" for="inlineRadio">User</label>
                 </div>
-          
+
                 <div class="form-check form-check-inline">
                   <input name = "manButton" class="form-check-input" type="radio"
                   id="inlineRadioOptionsUserType2" onclick="fixMan(); return true;" {% if
                   query[searchID | int - 1].hasMan == True %} checked {% endif %} />
                   <label class="form-check-label" for="inlineRadio">Manager</label>
                 </div>
-          
+
                 <div class="form-check form-check-inline">
                   <input name = "adminButton" class="form-check-input" type="radio"
                   id="inlineRadioOptionsUserType3" onclick="fixAdmin(); return true;" {%
@@ -114,19 +114,19 @@
                   <label class="form-check-label" for="inlineRadio">Admininstrator</label>
                 </div>
               </div>
-          
+
               <br />
-          
+
               <div class="text-center">
                 <button class="btn btn-success text-center" type="submit">Save</button>
               </div>
-            
+
             </form>
           </div>
         </div>
       </div>
     </div>
-    
+
 </div>
 
 <div class="container text-light pb-2" style="position: absolute; top: 100px; width: 1100px;">
@@ -135,14 +135,14 @@
     <div class="ml-auto">
       <input type="search" name="searchBar" class="form-control pr-1" placeholder="Account ID#"
         list = "userData" />
-      
-        <datalist id="userData"> 
+
+        <datalist id="userData">
           {% for account in acc_query %}
           <option name="accountIndex" >{{account.acc_num}}</option>
           {% endfor %}
-        </datalist>  
+        </datalist>
         <button class="btn btn-success" type="submit">View</button>
-    </div>  
+    </div>
   </form>
   <div>
     <table class="table table-striped table-dark">
@@ -172,7 +172,7 @@
   <div class="text-center">
     <a class = "btn btn-success" type="button" href="/newAccount">New Account</a>
   </div>
-  
+
 </div>
 
 
@@ -185,48 +185,48 @@
     function fixActive() {
       var statusRadioOne = document.getElementById("inlineRadioOptions1");
       var statusRadioTwo = document.getElementById("inlineRadioOptions2");
-  
+
       if (statusRadioOne.checked == true) {
         statusRadioTwo.checked = false;
       }
     }
-  
+
     function fixDeactive() {
       var statusRadioOne = document.getElementById("inlineRadioOptions1");
       var statusRadioTwo = document.getElementById("inlineRadioOptions2");
-  
+
       if (statusRadioTwo.checked == true) {
         statusRadioOne.checked = false;
       }
     }
-  
+
     function fixUsr() {
       var statusUsr = document.getElementById("inlineRadioOptionsUserType1");
       var statusMan = document.getElementById("inlineRadioOptionsUserType2");
       var statusAdmin = document.getElementById("inlineRadioOptionsUserType3");
-  
+
       if (statusUsr.checked == true) {
         statusMan.checked = false;
         statusAdmin.checked = false;
       }
     }
-  
+
     function fixMan() {
       var statusUsr = document.getElementById("inlineRadioOptionsUserType1");
       var statusMan = document.getElementById("inlineRadioOptionsUserType2");
       var statusAdmin = document.getElementById("inlineRadioOptionsUserType3");
-  
+
       if (statusMan.checked == true) {
         statusUsr.checked = false;
         statusAdmin.checked = false;
       }
     }
-  
+
     function fixAdmin() {
       var statusUsr = document.getElementById("inlineRadioOptionsUserType1");
       var statusMan = document.getElementById("inlineRadioOptionsUserType2");
       var statusAdmin = document.getElementById("inlineRadioOptionsUserType3");
-  
+
       if (statusAdmin.checked == true) {
         statusMan.checked = false;
         statusUsr.checked = false;

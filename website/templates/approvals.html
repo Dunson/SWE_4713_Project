@@ -32,7 +32,7 @@
         </tr>
       </thead>
 
-      <tbody id="myTable3" style="overflow-y: scroll;">
+      <tbody style="overflow-y: scroll;">
         {% for ledger in ledgerq %}
         <tr>
           <td id="acc_num">{{ledger.acc_num}}</td>
@@ -48,7 +48,7 @@
           <td style="color: red">Rejected</td>
           {% endif %}
           <td><form method="post"><button name="approve" type="submit" class="btn btn-success" value="{{ ledger.entry_num }}">Approve</button></form></td>
-        <td><form method="post"><button name="reject" type="submit" class="btn btn-danger" value="{{ ledger.entry_num }}" >Reject</button></form></td>
+          <td><form method="post"><button name="reject" type="submit" class="btn btn-danger" value="{{ ledger.entry_num }}" >Reject</button></form></td>
         </tr>
         {% endfor %}
 
@@ -79,6 +79,7 @@
           <th>Date Created</th>
           <th>Description</th>
           <th>Approval Status</th>
+          <th>Change Status</th>
         </tr>
       </thead>
 
@@ -97,6 +98,7 @@
           {% else %}
           <td style="color: red">Rejected</td>
           {% endif %}
+          <td><form method="post"><button name="reverse" type="submit" class="btn btn-warning">Change Status</button></form></td>
         </tr>
         {% endfor %}
 

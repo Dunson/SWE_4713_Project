@@ -367,7 +367,7 @@ def view_account():
         entry_deb = request.form.get('entry_deb')
         journal_id = 1
 
-        acc_id = int(ACC_ID)
+        acc_id = 1
 
         init_deb = float(entry_deb)
         init_cred = float(entry_cred)

@@ -222,8 +222,14 @@ def adminPort():
     #qID = 0
     # Logic for updating accounts
     if request.method == 'POST':
+        
         global SEARCHID
         SEARCHID = request.form.get('searchBar')
+
+        if not SEARCHID:
+            user_account_number = request.form.get("get_user")
+            return redirect(url_for('auth.accountOverview', id=int(user_account_number)))
+        
         if SEARCHID == None or len(SEARCHID) < 1:
             flash(no_blank, category='error')
             error = Error(error_desc=no_blank)
@@ -231,7 +237,7 @@ def adminPort():
             error.errorcreate(no_blank, commit=True)
             return redirect(url_for('auth.adminPort'))
         else:
-            return redirect(url_for('auth.accountOverview'))
+            return redirect(url_for('auth.accountOverview', id=SEARCHID))
 
     else:
 
@@ -246,9 +252,10 @@ def adminPort():
             return redirect(url_for('views.home'))
 
 
-@auth.route('/accountOverview/', methods=['GET', 'POST'])
+@auth.route('/accountOverview/<id>', methods=['GET', 'POST'])
 @login_required
-def accountOverview():
+def accountOverview(id):
+
 
     if current_user.hasAdmin:
 
@@ -259,7 +266,7 @@ def accountOverview():
 
         print(req.get("accOv"))
 
-        qID = SEARCHID
+        qID = id
         user_to_update = User.query.filter_by(id=qID).first()
 
         if request.method == 'POST':
@@ -295,20 +302,23 @@ def accountOverview():
 
                 if updateStat:
                     flash('Account updated successfully', category='success')
-                    return redirect(url_for('auth.accountOverview'))
+                    return redirect(url_for('auth.accountOverview',id = id))
                 else:
                     flash(acc_ufail, category='error')
                     error = Error(error_desc=acc_ufail)
                     db.session.add(error)
                     error.errorcreate(acc_ufail, commit=True)
 
-            #Using exception handling to determine the difference in POST requests. If a better alternative exists. Change ASAP
+            
             except TypeError as err:
-                #flash("TypeError: {0}".format(err), category='error')
-                #return redirect(url_for('auth.accountOverview'))
+                
                 global ACC_ID
                 ACC_ID = request.form.get('searchBar')
-                return redirect(url_for('auth.view_account'))
+                if ACC_ID:
+                    return redirect(url_for('auth.view_account', id = ACC_ID)) 
+
+                account_number = request.form.get("get_account")
+                return redirect(url_for('auth.view_account', id = int(account_number)))
 
     else:
         flash(no_access, category='error')
@@ -318,18 +328,17 @@ def accountOverview():
         return redirect(url_for('views.home'))
 
     return render_template('accountOverview.html', user=current_user, 
-                        query=User.query.all(), searchID=SEARCHID, 
-                        acc_query = Account.query.join(User).filter(Account.user_id==SEARCHID))
+                        query=User.query.all(), searchID=id, 
+                        acc_query = Account.query.join(User).filter(Account.user_id==id))
 
 
-#FORMAT monetary values to only use 2 decimal places by: 
-#formated_float = "{:.2f}.format(float_variable)"
-@auth.route('/newAccount', methods = ['GET', 'POST'])
+
+@auth.route('/newAccount/<id>', methods = ['GET', 'POST'])
 @login_required
-def newChart():
+def newChart(id):
 
 
-    qID = int(SEARCHID)
+    qID = id
     
     if request.method == 'POST':
         acc_name = request.form.get('acc_name')
@@ -345,7 +354,7 @@ def newChart():
         
         db.session.add(new_acc)
         db.session.commit()
-        return redirect(url_for('auth.accountOverview'))
+        return redirect(url_for('auth.accountOverview', id = id))
     
 
     return render_template('newAccount.html', user = current_user, 
@@ -355,9 +364,10 @@ def newChart():
 
 
 
-@auth.route('/accountView/', methods = ['GET', 'POST'])
+@auth.route('/accountView/<id>', methods = ['GET', 'POST'])
 @login_required
-def view_account():
+def view_account(id):
+    # id = Account.acc_num
 
     #POST request to add entry into ledger--
 
@@ -365,23 +375,26 @@ def view_account():
         entry_desc = request.form.get('entry_desc')
         entry_cred = request.form.get('entry_cred')
         entry_deb = request.form.get('entry_deb')
-        journal_id = 1
+        journal_id = 3 # set to 3
+         
+        #account.user_journals
 
-        acc_id = int(ACC_ID)
+        acc_ID = id # set to one by default until we fix html page
+
 
         init_deb = float(entry_deb)
         init_cred = float(entry_cred)
         entry_bal = init_deb - init_cred
 
-        new_entry = Ledger(acc_num=acc_id, entry_date=datetime.now(), entry_desc=entry_desc,
+        new_entry = Ledger(acc_num=acc_ID, entry_date=datetime.now(), entry_desc=entry_desc,
                            entry_cred=entry_cred, entry_deb=entry_deb, entry_bal=entry_bal,
                            isApproved='Pending', journal_id=journal_id)
         db.session.add(new_entry)
         db.session.commit()
 
-
         prev_entry_num = new_entry.get_entry_num() - 1
         prev_entry = Ledger.query.filter_by(entry_num = prev_entry_num).first()
+        print(prev_entry)
         prev_bal = ''
         if prev_entry:
             prev_bal = prev_entry.entry_bal
@@ -394,12 +407,12 @@ def view_account():
             new_entry.update_balance(new_balance, commit=True)
 
 
-        return redirect(url_for('auth.view_account',legder_num = acc_id))
+        return redirect(url_for('auth.view_account',id = acc_ID))
 
 
-    return render_template('accountView.html', user = current_user, acc_ID = ACC_ID,
-                        acc_query = Account.query.join(User).filter(Account.user_id==SEARCHID),
-                        led_query = Ledger.query.join(Account).filter(Ledger.acc_num==ACC_ID))
+    return render_template('accountView.html', user = current_user, acc_ID = id,
+                        acc_query = Account.query.join(User).filter(Account.user_id==id),
+                        led_query = Ledger.query.join(Account).filter(Ledger.acc_num==id))
 
 
 
@@ -464,16 +477,30 @@ def send_email():
 
     return render_template('email_user.html', user=user)
 
-@auth.route('/approvals', methods=['GET','POST'])
+@auth.route('/approvals', methods=['GET', 'POST'])
 def approve():
     user=current_user
     req =request.form
+    a = req.get("approve")
+    r = req.get("reject")
 
     if request.method == "POST":
-        if req.get("approve"):
-            print("x")
-        elif req.get("reject"):
-            print("reject")
+        if a:
+            approval_query = Ledger.query.filter_by(entry_num=int(a)).first()
+            approval_query.isApproved = 'Approved'
+        elif r:
+            rejection_query = Ledger.query.filter_by(entry_num=int(r)).first()
+            rejection_query.isApproved = 'Rejected'
+
+        db.session.commit()
+
+    return render_template('approvals.html', user=user, ledgerq=Ledger.query.filter_by(isApproved='Pending'),
+                           rejected_entries=Ledger.query.filter_by(isApproved='Rejected'),
+                           approved_entries=Ledger.query.filter_by(isApproved='Approved'),
+                           all=Ledger.query.all())
+
+            
+
     return render_template('approvals.html', user=user, ledgerq=Ledger.query.filter_by(isApproved='Pending'),
                            rejected_entries=Ledger.query.filter_by(isApproved='Rejected'))
 

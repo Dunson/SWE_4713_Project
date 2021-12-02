@@ -47,8 +47,8 @@
           {% else %}
           <td style="color: red">Rejected</td>
           {% endif %}
-          <td><form method="post"><button name="approve" type="submit" class="btn btn-success">Approve</button></form></td>
-        <td><form method="post"><button name="reject" type="submit" class="btn btn-danger" >Reject</button></form></td>
+          <td><form method="post"><button name="approve" type="submit" class="btn btn-success" value="{{ ledger.entry_num }}">Approve</button></form></td>
+          <td><form method="post"><button name="reject" type="submit" class="btn btn-danger" value="{{ ledger.entry_num }}" >Reject</button></form></td>
         </tr>
         {% endfor %}
 

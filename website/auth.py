@@ -355,9 +355,10 @@ def newChart():
 
 
 
-@auth.route('/accountView/', methods = ['GET', 'POST'])
+@auth.route('/accountView/<id>', methods = ['GET', 'POST'])
 @login_required
-def view_account():
+def view_account(id):
+    id = Account.acc_num
 
     #POST request to add entry into ledger--
 
@@ -365,15 +366,17 @@ def view_account():
         entry_desc = request.form.get('entry_desc')
         entry_cred = request.form.get('entry_cred')
         entry_deb = request.form.get('entry_deb')
-        journal_id = 1
+        journal_id = 3 # set to 3
 
-        acc_id = 1
 
-        init_deb = float(entry_deb)
-        init_cred = float(entry_cred)
+        acc_ID = 1 # set to one by default until we fix html page
+
+
+        init_deb = float(int(entry_deb))
+        init_cred = float(int(entry_cred))
         entry_bal = init_deb - init_cred
 
-        new_entry = Ledger(acc_num=acc_id, entry_date=datetime.now(), entry_desc=entry_desc,
+        new_entry = Ledger(acc_num=acc_ID, entry_date=datetime.now(), entry_desc=entry_desc,
                            entry_cred=entry_cred, entry_deb=entry_deb, entry_bal=entry_bal,
                            isApproved='Pending', journal_id=journal_id)
         db.session.add(new_entry)
@@ -394,7 +397,7 @@ def view_account():
             new_entry.update_balance(new_balance, commit=True)
 
 
-        return redirect(url_for('auth.view_account',legder_num = acc_id))
+        return redirect(url_for('auth.view_account',id = acc_ID))
 
 
     return render_template('accountView.html', user = current_user, acc_ID = ACC_ID,

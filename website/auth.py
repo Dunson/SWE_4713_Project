@@ -465,18 +465,28 @@ def send_email():
 
     return render_template('email_user.html', user=user)
 
-@auth.route('/approvals', methods=['GET','POST'])
+
+@auth.route('/approvals', methods=['GET', 'POST'])
 def approve():
     user=current_user
     req =request.form
+    a = req.get("approve")
+    r = req.get("reject")
 
     if request.method == "POST":
-        if req.get("approve"):
-            print("x")
-        elif req.get("reject"):
-            print("reject")
+        if a:
+            approval_query = Ledger.query.filter_by(entry_num=int(a)).first()
+            approval_query.isApproved = 'Approved'
+        elif r:
+            rejection_query = Ledger.query.filter_by(entry_num=int(r)).first()
+            rejection_query.isApproved = 'Rejected'
+
+        db.session.commit()
+
     return render_template('approvals.html', user=user, ledgerq=Ledger.query.filter_by(isApproved='Pending'),
-                           rejected_entries=Ledger.query.filter_by(isApproved='Rejected'))
+                           rejected_entries=Ledger.query.filter_by(isApproved='Rejected'),
+                           approved_entries=Ledger.query.filter_by(isApproved='Approved'),
+                           all=Ledger.query.all())
 
 
 @auth.route('/acc_ledger/<id>', methods=['GET', 'POST'])
@@ -484,6 +494,21 @@ def accl (id):
     id = User.id
     return render_template('acc_ledger.html', user=current_user, journal_query=Journal.query.join(Account),
                            accl_query=Ledger.query.join(Journal), att_query=Attachments.query.join(Ledger))
+
+
+@auth.route('/income_statement/', methods=['GET','POST'])
+def income_statement():
+    return render_template('income_statement.html', user=current_user)
+
+
+@auth.route('/balance_sheet/', methods=['GET','POST'])
+def balance_sheet():
+    return render_template('balance_sheet.html', user=current_user)
+
+
+@auth.route('/trial_balance/', methods=['GET','POST'])
+def trial_balance():
+    return render_template('trial_balance.html', user=current_user)
 
 # --Tools---
 

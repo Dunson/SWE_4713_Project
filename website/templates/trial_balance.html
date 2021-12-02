@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% extends "base.html" %} {% block title %} Reports {% endblock %}
+
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <title>Reports</title>
+
+</head>
+<body>
+        <div class="table-wrapper">
+            <h2>Trial Balance</h2>
+            <table class="table table-hover">
+                <th>Description</th>
+                <th>Debit</th>
+                <th>Credit</th>
+                <tr>
+                    <td>x</td>
+                    <td>y</td>
+                    <td>z</td>
+                </tr>
+            </table>
+            <button name="submitbutton" type="submit" class="btn btn-primary btn-block">Convert to PDF</button>
+        </div>
+</body>
+
+{% endblock %}
+</html>

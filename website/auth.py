@@ -222,14 +222,14 @@ def adminPort():
     #qID = 0
     # Logic for updating accounts
     if request.method == 'POST':
-        
+
         global SEARCHID
         SEARCHID = request.form.get('searchBar')
 
         if not SEARCHID:
             user_account_number = request.form.get("get_user")
             return redirect(url_for('auth.accountOverview', id=int(user_account_number)))
-        
+
         if SEARCHID == None or len(SEARCHID) < 1:
             flash(no_blank, category='error')
             error = Error(error_desc=no_blank)
@@ -309,13 +309,13 @@ def accountOverview(id):
                     db.session.add(error)
                     error.errorcreate(acc_ufail, commit=True)
 
-            
+
             except TypeError as err:
-                
+
                 global ACC_ID
                 ACC_ID = request.form.get('searchBar')
                 if ACC_ID:
-                    return redirect(url_for('auth.view_account', id = ACC_ID)) 
+                    return redirect(url_for('auth.view_account', id = ACC_ID))
 
                 account_number = request.form.get("get_account")
                 return redirect(url_for('auth.view_account', id = int(account_number)))
@@ -328,7 +328,7 @@ def accountOverview(id):
         return redirect(url_for('views.home'))
 
     return render_template('accountOverview.html', user=current_user, 
-                        query=User.query.all(), searchID=id, 
+                        query=User.query.all(), searchID=id,
                         acc_query = Account.query.join(User).filter(Account.user_id==id))
 
 
@@ -376,7 +376,7 @@ def view_account(id):
         entry_cred = request.form.get('entry_cred')
         entry_deb = request.form.get('entry_deb')
         journal_id = 3 # set to 3
-         
+
         #account.user_journals
 
         acc_ID = id # set to one by default until we fix html page
@@ -391,6 +391,7 @@ def view_account(id):
                            isApproved='Pending', journal_id=journal_id)
         db.session.add(new_entry)
         db.session.commit()
+
 
         prev_entry_num = new_entry.get_entry_num() - 1
         prev_entry = Ledger.query.filter_by(entry_num = prev_entry_num).first()
@@ -499,17 +500,27 @@ def approve():
                            approved_entries=Ledger.query.filter_by(isApproved='Approved'),
                            all=Ledger.query.all())
 
-            
-
-    return render_template('approvals.html', user=user, ledgerq=Ledger.query.filter_by(isApproved='Pending'),
-                           rejected_entries=Ledger.query.filter_by(isApproved='Rejected'))
-
 
 @auth.route('/acc_ledger/<id>', methods=['GET', 'POST'])
 def accl (id):
     id = User.id
     return render_template('acc_ledger.html', user=current_user, journal_query=Journal.query.join(Account),
                            accl_query=Ledger.query.join(Journal), att_query=Attachments.query.join(Ledger))
+
+
+@auth.route('/income_statement/', methods=['GET','POST'])
+def income_statement():
+    return render_template('income_statement.html', user=current_user)
+
+
+@auth.route('/balance_sheet/', methods=['GET','POST'])
+def balance_sheet():
+    return render_template('balance_sheet.html', user=current_user)
+
+
+@auth.route('/trial_balance/', methods=['GET','POST'])
+def trial_balance():
+    return render_template('trial_balance.html', user=current_user)
 
 # --Tools---
 

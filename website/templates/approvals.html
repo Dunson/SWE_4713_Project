@@ -83,7 +83,7 @@
         </tr>
       </thead>
 
-      <tbody style="overflow-y: scroll;">
+      <tbody id="myTable" style="overflow-y: scroll;">
         {% for x in rejected_entries %}
         <tr>
           <td id="acc_num">{{x.acc_num}}</td>
@@ -107,6 +107,52 @@
   </div>
 
   <br>
+
+
+</div>
+
+   <div class="container-fluid px-3 py-1 pb-4">
+
+    <form class="form-inline" method="POST">
+      <h2 class="text-dark pt-2">Approved Ledger Entries</h2>
+    </form>
+
+  <div>
+    <table class="table table-striped table-dark">
+      <thead style="position: sticky;">
+        <tr>
+          <th>Account Number</th>
+          <th>Entry Number</th>
+          <th>Credited</th>
+          <th>Debited</th>
+          <th>Balance</th>
+          <th>Date Created</th>
+          <th>Description</th>
+          <th>Approval Status</th>
+        </tr>
+      </thead>
+
+      <tbody id="myTable" style="overflow-y: scroll;">
+        {% for x in approved_entries %}
+        <tr>
+          <td id="acc_num">{{x.acc_num}}</td>
+          <td id="entry_num">{{x.entry_num}}</td>
+          <td id="entry_cred">{{x.entry_cred}}</td>
+          <td id="entry_deb">{{x.entry_deb}}</td>
+          <td id="entry_bal">{{x.entry_bal}}</td>
+          <td id="entry_date">{{x.entry_date}}</td>
+          <td id="entry_desc">{{x.entry_desc}}</td>
+          {% if x.isApproved == 'Approved' %}
+          <td style="color: green">Approved</td>
+        {% endif %}
+        </tr>
+        {% endfor %}
+
+      </tbody>
+    </table>
+  </div>
+
+</div>
 
 </div>
 

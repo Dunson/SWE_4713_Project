@@ -64,7 +64,7 @@ content%}
           {% endif %}
             <td>
                 <form method="POST">
-                    <button type="submit" class="btn btn-outline-light" value="{{ user.id }}">
+                    <button name="accOv" type="submit" class="btn btn-outline-light" value="{{ user.id }}">
                         <a href="{{ url_for('auth.accountOverview') }}" >View Account</a>
                     </button>
                 </form>

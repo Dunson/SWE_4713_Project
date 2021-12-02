@@ -114,25 +114,11 @@ class Account(db.Model):
     
     acc_num = db.Column(db.Integer, primary_key=True)  # unique identifier. Needs adjusting
     user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
-
     acc_name = db.Column(db.String(150), unique=True)
     acc_desc = db.Column(db.String(150))
     acc_cat = db.Column(db.String(150))
-    # acc_sub_cat = db.Column(db.String(150)
-   
     init_bal = db.Column(db.Float)
-    # acc_bal = db.Column(db.Float)
-    # acc_deb = db.Column(db.Float)
-    # acc_cred = db.Column(db.Float)
-
     acc_statement = db.Column(db.String(150))
-    # acc_order = db.Column(db.Integer)
-
-    # creation_date = db.Column(db.Date())
-    # creation_time = db.Column(db.Time(), nullable = False)
-
-    # acc_status = db.Column(db.Boolean, default = False)
-    # acc_comment = db.Column(db.String(150))
     db.relationship('Journal', backref='user_journals')
 
     def user_balance_above_zero(self):
@@ -188,6 +174,14 @@ class Ledger(db.Model):
             return True
         else:
             return False
+
+    def get_entry_num(self):
+        return self.entry_num
+
+    def update_balance(self, new_balance, commit=False):
+        self.entry_bal = new_balance
+        if commit:
+            commit = True
 
 
 # add attachments to the ledger

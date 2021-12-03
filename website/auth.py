@@ -213,6 +213,21 @@ def reset_password(token):
 
     return render_template('reset_verified.html', user=current_user)
 
+#This is what I made for the suspension, im pretty sure that it updates everything appropriately but who knows, adminPortal holds the submit and datePicker. Not sure where to put this jazz
+"""
+@auth.route('/suspend', methods=['GET', 'POST'])
+@login_required
+def suspend():
+    if request.method =="POST":
+        suspensionEnd = request.form["suspensionDate"]
+        User.query().filter(User.userName == form.username.data).update({"suspensionDate": suspensionEnd})
+        User.query().filter(User.username == form.username.data).update({"status": False})
+
+    now = date.today
+    current_time = now - User.suspensionDate
+    if current_time <= 0 :
+        User.query().filter(User.username == form.username.data).update({"status": True})
+"""
 
 # Method for admin dashboard
 @auth.route('/adminPortal', methods=['GET', 'POST'])
@@ -355,10 +370,9 @@ def newChart():
 
 
 
-@auth.route('/accountView/<id>', methods = ['GET', 'POST'])
+@auth.route('/accountView/', methods = ['GET', 'POST'])
 @login_required
-def view_account(id):
-    id = Account.acc_num
+def view_account():
 
     #POST request to add entry into ledger--
 
@@ -366,15 +380,15 @@ def view_account(id):
         entry_desc = request.form.get('entry_desc')
         entry_cred = request.form.get('entry_cred')
         entry_deb = request.form.get('entry_deb')
-        journal_id = 3 # set to 3
+        journal_id = 1
 
-        acc_ID = 1 # set to one by default until we fix html page
+        acc_id = int(ACC_ID)
 
-        init_deb = float(int(entry_deb))
-        init_cred = float(int(entry_cred))
+        init_deb = float(entry_deb)
+        init_cred = float(entry_cred)
         entry_bal = init_deb - init_cred
 
-        new_entry = Ledger(acc_num=acc_ID, entry_date=datetime.now(), entry_desc=entry_desc,
+        new_entry = Ledger(acc_num=acc_id, entry_date=datetime.now(), entry_desc=entry_desc,
                            entry_cred=entry_cred, entry_deb=entry_deb, entry_bal=entry_bal,
                            isApproved='Pending', journal_id=journal_id)
         db.session.add(new_entry)
@@ -395,7 +409,7 @@ def view_account(id):
             new_entry.update_balance(new_balance, commit=True)
 
 
-        return redirect(url_for('auth.view_account',id = acc_ID))
+        return redirect(url_for('auth.view_account',legder_num = acc_id))
 
 
     return render_template('accountView.html', user = current_user, acc_ID = ACC_ID,
@@ -509,3 +523,19 @@ def calculate_balance(prev_entry, curr_entry):
 def format_balance(float_variable):
     formated_float = '{:.2f}'.format(float_variable)
     return formated_float
+
+"""
+          .---.     .---.
+         ( -o- )---( -o- )
+         ;-...-`   `-...-;
+        /                 \
+       /                   \
+      | /_               _\ |
+      \`'.`'"--.....--"'`.'`/
+       \  '.   `._.`   .'  /
+    _.-''.  `-.,___,.-`  .''-._
+   `--._  `'-._______.-'`  _.--`
+        /                 \
+       /.-'`\   .'.   /`'-.\
+      `      '.'   '.'
+"""

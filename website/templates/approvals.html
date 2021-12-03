@@ -48,14 +48,36 @@
           <td style="color: red">Rejected</td>
           {% endif %}
           <td><form method="post"><button name="approve" type="submit" class="btn btn-success" value="{{ ledger.entry_num }}">Approve</button></form></td>
-          <td><form method="post"><button name="reject" type="submit" class="btn btn-danger" value="{{ ledger.entry_num }}" >Reject</button></form></td>
+          <td>
+              <!-- Button trigger modal -->
+            <button name="init_reject" type="button" class="btn btn-danger" data-toggle="modal" data-target="#exampleModal">Reject</button>
+
+<!-- Modal -->
+ <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post">
+      <div class="modal-body">
+            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea"></textarea>
+            <label for="floatingTextarea">Comment</label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" name="reject" class="btn btn-primary" value={{ ledger.entry_num }} data-dismiss="modal">Save changes</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+          </td>
         </tr>
         {% endfor %}
 
       </tbody>
     </table>
   </div>
-
+        )
 
   <br>
 
@@ -79,7 +101,7 @@
           <th>Date Created</th>
           <th>Description</th>
           <th>Approval Status</th>
-          <th>Change Status</th>
+          <th>Rejection Reason</th>
         </tr>
       </thead>
 
@@ -98,7 +120,7 @@
           {% else %}
           <td style="color: red">Rejected</td>
           {% endif %}
-          <td><form method="post"><button name="reverse" type="submit" class="btn btn-warning">Change Status</button></form></td>
+          <td id="reject_comment">{{ x.reject_comment }}</td>
         </tr>
         {% endfor %}
 

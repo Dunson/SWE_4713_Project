@@ -3,13 +3,14 @@ from smtplib import SMTPAuthenticationError
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from sqlalchemy.orm import query
-from .models import User, Account, Ledger, Error, Journal, Attachments
+from .models import User, Account, Ledger, Error
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db, mail
 from flask_login import login_user, login_required, logout_user, current_user
 from .email import send_recovery
 from datetime import datetime, timedelta
 from flask_mail import Mail, Message
+import json
 auth = Blueprint('auth', __name__)
 
 #GLOBAL Variables
@@ -104,7 +105,6 @@ def logout():
     logout_user()
     return redirect(url_for('auth.login'))
 
-
 @auth.route('/sign-up', methods=['GET', 'POST'])
 def sign_up():
     if request.method == 'POST':
@@ -114,8 +114,12 @@ def sign_up():
         password_one = request.form.get('password1')
         password_two = request.form.get('password2')
 
-        user = User.query.filter_by(email=email).first()
-        pwd_check = User.password_check(password_one)
+        print(password_one,password_two)
+
+        user_init = User()
+
+        user = user_init.query.filter_by(email=email).first()
+        pwd_check = user_init.password_check(password_one, password_two)
 
         # Creation validation logic
         if user:
@@ -141,8 +145,7 @@ def sign_up():
         else:
             # Add user to database
             new_user = User(email=email, firstName=firstName, lastName=lastName,
-                            password=generate_password_hash(
-                                password_one, method='sha256'),
+                            password=generate_password_hash(password_one, method='sha256'),
                             userName=userNameGenGlobal(firstName, lastName),
                             hasAdmin=False, hasMan=False, status=False,
                             creationDate=datetime.now(), expirationDate=datetime.now() + timedelta(days=365))
@@ -329,7 +332,7 @@ def accountOverview(id):
 
     return render_template('accountOverview.html', user=current_user, 
                         query=User.query.all(), searchID=id,
-                        acc_query = Account.query.join(User).filter(Account.user_id==id))
+                        acc_query= Account.query.join(User).filter(Account.user_id==id))
 
 
 
@@ -375,20 +378,17 @@ def view_account(id):
         entry_desc = request.form.get('entry_desc')
         entry_cred = request.form.get('entry_cred')
         entry_deb = request.form.get('entry_deb')
-        journal_id = 3 # set to 3
-
-        #account.user_journals
-
-        acc_ID = id # set to one by default until we fix html page
+        acc_ID = id
 
 
         init_deb = float(entry_deb)
         init_cred = float(entry_cred)
         entry_bal = init_deb - init_cred
 
-        new_entry = Ledger(acc_num=acc_ID, entry_date=datetime.now(), entry_desc=entry_desc,
+        new_entry = Ledger(entry_date=datetime.now(), entry_desc=entry_desc,
                            entry_cred=entry_cred, entry_deb=entry_deb, entry_bal=entry_bal,
-                           isApproved='Pending', journal_id=journal_id)
+                           isApproved='Pending', acc_num=acc_ID, attachment=bytes(json.dumps("static/default.pdf"), 'utf8'),
+                           reject_comment="N/A")
         db.session.add(new_entry)
         db.session.commit()
 
@@ -407,13 +407,12 @@ def view_account(id):
             new_balance = format_balance(calculate_balance(prev_bal, entry_bal))
             new_entry.update_balance(new_balance, commit=True)
 
-
         return redirect(url_for('auth.view_account',id = acc_ID))
 
-
-    return render_template('accountView.html', user = current_user, acc_ID = id,
-                        acc_query = Account.query.join(User).filter(Account.user_id==id),
-                        led_query = Ledger.query.join(Account).filter(Ledger.acc_num==id))
+    return render_template('accountView.html', user= current_user, acc_ID=id,
+                        acc_query=Account.query.join(User).filter(Account.user_id == id),
+                        led_query=Ledger.query.join(Account).filter(Ledger.acc_num == id,
+                                                                    Ledger.isApproved == 'Approved'))
 
 
 
@@ -431,7 +430,7 @@ def userNameGenGlobal(first, last):
 
 @auth.route('/home')
 def homepage():
-    return render_template("home.html", user=current_user, acc_query = Account.query.join(User))
+    return render_template("home.html", user=current_user, acc_query=Account.query.join(User))
 
 
 @auth.route('/help')
@@ -442,10 +441,6 @@ def help():
 @auth.route('/email_user')
 def e():
     return render_template("email_user.html", user=current_user)
-
-@auth.route('/prepare_entries')
-def pe():
-    return render_template("prepare_entries.html", user=current_user)
 
 
 @auth.route('/email_user', methods=['POST', 'GET'])
@@ -499,13 +494,6 @@ def approve():
                            rejected_entries=Ledger.query.filter_by(isApproved='Rejected'),
                            approved_entries=Ledger.query.filter_by(isApproved='Approved'),
                            all=Ledger.query.all())
-
-
-@auth.route('/acc_ledger/<id>', methods=['GET', 'POST'])
-def accl (id):
-    id = User.id
-    return render_template('acc_ledger.html', user=current_user, journal_query=Journal.query.join(Account),
-                           accl_query=Ledger.query.join(Journal), att_query=Attachments.query.join(Ledger))
 
 
 @auth.route('/income_statement/', methods=['GET','POST'])

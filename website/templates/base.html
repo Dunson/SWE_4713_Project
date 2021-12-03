@@ -79,7 +79,6 @@
                  <li class = "nav-item">
                     <a class = "nav-link text-light text-center" id = "approvals" href="/approvals">Approvals</a>
                  </li>
-
                 {% endif %}
 
                 <li class="nav-item dropdown">
@@ -87,7 +86,10 @@
                     <a class = "nav-link dropdown-toggle text-light text-center" id = "" data-toggle = "dropdown" aria-haspopup="true" aria-expanded="false">  
                         {{ user.userName }}
                     </a>
-                    <div class = "dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink"> 
+                    <div class = "dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+                        <a class = "nav-link text-dark" id = "is" href="/income_statement">Income Statement</a>
+                        <a class = "nav-link text-dark" id = "bs" href="/balance_sheet">Balance Sheet</a>
+                        <a class = "nav-link text-dark" id = "tb" href="/trial_balance">Trial Balance</a>
                         <a class = "nav-link text-dark" id = "logout" href="/logout">Logout</a>
                     </div>
                 </li>
@@ -148,5 +150,15 @@
 <div class="footer" style="background-color: lightgray;">
     <a href="/help" class="btn btn-primary">Need Help? Click Here!</a>
 </div>
+
+
+<style>
+    .table-wrapper {
+  max-height: 500px;
+  width: 1250px;
+  overflow: auto;
+  display:inline-block;
+}
+</style>
 
 </html>

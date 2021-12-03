@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% extends "base.html" %} {% block title %} Reports {% endblock %}
+
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <title>Reports</title>
+
+</head>
+<body>
+
+        <div class="table-wrapper">
+            <h2>Balance Sheet</h2>
+            <table class="table table-hover">
+                <th>Asset</th>
+                <tr>
+                    <th>Description</th>
+                    <th>Debited</th>
+                    <th>Credited</th>
+                </tr>
+                <tr>
+                    <td>x</td>
+                    <td>y</td>
+                    <td>z</td>
+                </tr>
+                <th>Expense</th>
+                <tr>
+                    <th>Account Description</th>
+                    <th>Debited</th>
+                    <th>Credited</th>
+                </tr>
+                <tr>
+                    <td>x</td>
+                    <td>y</td>
+                    <td>z</td>
+                </tr>
+                <th>Liability</th>
+                <tr>
+                    <th>Account Description</th>
+                    <th>Debited</th>
+                    <th>Credited</th>
+                </tr>
+                <tr>
+                    <td>x</td>
+                    <td>y</td>
+                    <td>z</td>
+                </tr>
+                <th>Revenue</th>
+                <tr>
+                    <th>Account Description</th>
+                    <th>Debited</th>
+                    <th>Credited</th>
+                </tr>
+                <tr>
+                    <td>x</td>
+                    <td>y</td>
+                    <td>z</td>
+                </tr>
+                <td>Total</td>
+                <td>x</td>
+                <td>y</td>
+            </table>
+            <button name="submitbutton" type="submit" class="btn btn-primary btn-block">Convert to PDF</button>
+        </div>
+
+</body>
+
+{% endblock %}
+</html>

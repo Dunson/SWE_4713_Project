@@ -63,9 +63,9 @@ content%}
           <td style="color: red">Deactivated</td>
           {% endif %}
             <td>
-                <form method="POST">
-                    <button name="accOv" type="submit" class="btn btn-outline-light" value="{{ user.id }}">
-                        <a href="{{ url_for('auth.accountOverview') }}" >View Account</a>
+                <form method="POST" >
+                    <button type="submit" name = "get_user" class="btn btn-success" value="{{ user.id }}">
+                        View User Account
                     </button>
                 </form>
             </td>

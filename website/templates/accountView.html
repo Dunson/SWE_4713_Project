@@ -16,7 +16,7 @@
             <th scope="col">Debit</th>
             <th scope="col">Credit</th>
             <th scope="col">Balance</th>
-              <th scope="col">PR</th>
+              <th scope="col">Post Reference</th>
           </tr>
         </thead>
         <tbody style="overflow-y: scroll;">
@@ -29,7 +29,7 @@
             <td>{{ledger.entry_deb}}</td>
             <td>{{ledger.entry_cred}}</td>
             <td>${{ledger.entry_bal}}</td>
-          <td><a href="/accountOverview/{{ ledger.acc_num }}">Post Reference</a></td>
+            <td><form method="post"><button name="pr" type="submit" class="btn btn-primary" value="{{ ledger.acc_num }}">Link</button></form></td>
           </tr>
           {% endfor %}
           

@@ -18,4 +18,5 @@ def home():
         ACC_ID = request.form.get('searchBar')
         return redirect(url_for('auth.view_account'))
 
-    return render_template("home.html", user=current_user,  acc_query=Account.query.join(User))
+    return render_template("home.html", user=current_user,  acc_query=Account.query.join(User),
+                           usracc=Account.query.join(User).filter(User.id == current_user.id))

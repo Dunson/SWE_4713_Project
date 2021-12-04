@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from flask_mail import Mail, Message
 import json
 auth = Blueprint('auth', __name__)
+from sqlalchemy.sql import func
 
 #GLOBAL Variables
 SEARCHID = 'none'
@@ -244,7 +245,7 @@ def adminPort():
 
     else:
 
-        if current_user.hasAdmin:
+        if current_user.hasAdmin or current_user.hasMan:
             return render_template('adminPortal.html',
                                    user=current_user, query=User.query.all())
         else:
@@ -260,7 +261,7 @@ def adminPort():
 def accountOverview(id):
 
 
-    if current_user.hasAdmin:
+    if current_user.hasAdmin or current_user.hasMan:
 
         usr_status = False
         usr_hasMan = False
@@ -318,10 +319,10 @@ def accountOverview(id):
                 global ACC_ID
                 ACC_ID = request.form.get('searchBar')
                 if ACC_ID:
-                    return redirect(url_for('auth.view_account', id = ACC_ID))
+                    return redirect(url_for('auth.view_account', id=ACC_ID))
 
                 account_number = request.form.get("get_account")
-                return redirect(url_for('auth.view_account', id = int(account_number)))
+                return redirect(url_for('auth.view_account', id=int(account_number)))
 
     else:
         flash(no_access, category='error')
@@ -330,9 +331,8 @@ def accountOverview(id):
         error.errorcreate(no_access, commit=True)
         return redirect(url_for('views.home'))
 
-    return render_template('accountOverview.html', user=current_user, 
-                        query=User.query.all(), searchID=id,
-                        acc_query= Account.query.join(User).filter(Account.user_id==id))
+    return render_template('accountOverview.html', user=current_user, query=User.query.all(),
+                           searchID=id, acc_query=Account.query.join(User).filter(Account.user_id == id))
 
 
 
@@ -350,10 +350,10 @@ def newChart(id):
         init_bal = request.form.get('init_bal')
         acc_statement = request.form.get('acc_statement')
         
-        new_acc = Account(acc_name = acc_name, acc_cat = acc_cat, 
-                            acc_desc = acc_desc, init_bal = init_bal,
-                            acc_statement = acc_statement, 
-                            user_id = qID)
+        new_acc = Account(acc_name=acc_name, acc_cat=acc_cat,
+                            acc_desc=acc_desc, init_bal=init_bal,
+                            acc_statement=acc_statement,
+                            user_id=qID)
         
         db.session.add(new_acc)
         db.session.commit()
@@ -378,8 +378,11 @@ def view_account(id):
         entry_desc = request.form.get('entry_desc')
         entry_cred = request.form.get('entry_cred')
         entry_deb = request.form.get('entry_deb')
-        acc_ID = id
+        attachment = request.form.get('attachment')
+        acc_id = id
 
+        if attachment == None:
+            attachment = "static/default.pdf"
 
         init_deb = float(entry_deb)
         init_cred = float(entry_cred)
@@ -387,29 +390,14 @@ def view_account(id):
 
         new_entry = Ledger(entry_date=datetime.now(), entry_desc=entry_desc,
                            entry_cred=entry_cred, entry_deb=entry_deb, entry_bal=entry_bal,
-                           isApproved='Pending', acc_num=acc_ID, attachment=bytes(json.dumps("static/default.pdf"), 'utf8'),
+                           isApproved='Pending', acc_num=acc_id, attachment=bytes(json.dumps(attachment), 'utf8'),
                            reject_comment="N/A")
         db.session.add(new_entry)
         db.session.commit()
 
+        return redirect(url_for('auth.view_account', id=acc_id))
 
-        prev_entry_num = new_entry.get_entry_num() - 1
-        prev_entry = Ledger.query.filter_by(entry_num = prev_entry_num).first()
-        print(prev_entry)
-        prev_bal = ''
-        if prev_entry:
-            prev_bal = prev_entry.entry_bal
-
-
-        if new_entry.entry_num == 1:
-            new_entry.update_balance(entry_bal, commit=True)
-        else:
-            new_balance = format_balance(calculate_balance(prev_bal, entry_bal))
-            new_entry.update_balance(new_balance, commit=True)
-
-        return redirect(url_for('auth.view_account',id = acc_ID))
-
-    return render_template('accountView.html', user= current_user, acc_ID=id,
+    return render_template('accountView.html', user=current_user, acc_id=id,
                         acc_query=Account.query.join(User).filter(Account.user_id == id),
                         led_query=Ledger.query.join(Account).filter(Ledger.acc_num == id,
                                                                     Ledger.isApproved == 'Approved'))
@@ -430,7 +418,8 @@ def userNameGenGlobal(first, last):
 
 @auth.route('/home')
 def homepage():
-    return render_template("home.html", user=current_user, acc_query=Account.query.join(User))
+    return render_template("home.html", user=current_user, acc_query=Account.query.join(User),
+                           usracc=Account.query.join(User).filter(User.id == current_user.id))
 
 
 @auth.route('/help')
@@ -479,6 +468,10 @@ def approve():
     req =request.form
     a = req.get("approve")
     r = req.get("reject")
+    rc = req.get("reject_reasoning")
+
+    if rc == None:
+        rc = "N/A"
 
     if request.method == "POST":
         if a:
@@ -487,6 +480,7 @@ def approve():
         elif r:
             rejection_query = Ledger.query.filter_by(entry_num=int(r)).first()
             rejection_query.isApproved = 'Rejected'
+            rejection_query.reject_comment = rc
 
         db.session.commit()
 
@@ -498,16 +492,19 @@ def approve():
 
 @auth.route('/income_statement/', methods=['GET','POST'])
 def income_statement():
+    id = current_user.id
     return render_template('income_statement.html', user=current_user)
 
 
 @auth.route('/balance_sheet/', methods=['GET','POST'])
 def balance_sheet():
-    return render_template('balance_sheet.html', user=current_user)
+    id = current_user.id
+    return render_template('balance_sheet.html', user=current_user ) #account=current_user.accounts
 
 
 @auth.route('/trial_balance/', methods=['GET','POST'])
 def trial_balance():
+    id = current_user.id
     return render_template('trial_balance.html', user=current_user)
 
 # --Tools---

@@ -66,7 +66,7 @@ def login():
                 return redirect(url_for('auth.adminPort'))
 
             if check_password_hash(user.password, password):
-                flash('Login Succeful!', category='success')
+                flash('Login Successful!', category='success')
                 login_user(user)
 
                 return redirect(url_for('views.home'))
@@ -78,7 +78,7 @@ def login():
 
             # Limits login attempts
             if check_password_hash(user.password, password):
-                flash('Login Succeful!', category='success')
+                flash('Login Successful!', category='success')
                 login_user(user)
                 global ATTEMPT_COUNT
                 ATTEMPT_COUNT = 0
@@ -103,6 +103,8 @@ def login():
 @auth.route('/logout')
 @login_required
 def logout():
+    global ATTEMPT_COUNT
+    ATTEMPT_COUNT = 0
     logout_user()
     return redirect(url_for('auth.login'))
 
@@ -268,7 +270,7 @@ def accountOverview(id):
         usr_hasAdmin = False
         req = request.form
 
-        print(req.get("accOv"))
+        # print(req.get("accOv"))
 
         qID = id
         user_to_update = User.query.filter_by(id=qID).first()
@@ -313,7 +315,6 @@ def accountOverview(id):
                     db.session.add(error)
                     error.errorcreate(acc_ufail, commit=True)
 
-
             except TypeError as err:
 
                 global ACC_ID
@@ -322,7 +323,13 @@ def accountOverview(id):
                     return redirect(url_for('auth.view_account', id=ACC_ID))
 
                 account_number = request.form.get("get_account")
-                return redirect(url_for('auth.view_account', id=int(account_number)))
+                if account_number:
+                    return redirect(url_for('auth.view_account', id=int(account_number)))
+
+                new_account = request.form.get('new_account')
+                if new_account:
+                    print(new_account)
+                    return redirect(url_for('auth.newChart', id=int(new_account)))
 
     else:
         flash(no_access, category='error')
@@ -340,24 +347,24 @@ def accountOverview(id):
 @login_required
 def newChart(id):
 
-
     qID = id
     
     if request.method == 'POST':
+
         acc_name = request.form.get('acc_name')
         acc_cat = request.form.get('acc_cat')
         acc_desc = request.form.get('acc_desc')
-        init_bal = request.form.get('init_bal')
+        # init_bal = request.form.get('init_bal')
         acc_statement = request.form.get('acc_statement')
         
         new_acc = Account(acc_name=acc_name, acc_cat=acc_cat,
-                            acc_desc=acc_desc, init_bal=init_bal,
+                            acc_desc=acc_desc, init_bal=0.00,
                             acc_statement=acc_statement,
                             user_id=qID)
         
         db.session.add(new_acc)
         db.session.commit()
-        return redirect(url_for('auth.accountOverview', id = id))
+        return redirect(url_for('auth.accountOverview', id=id))
     
 
     return render_template('newAccount.html', user = current_user, 
@@ -371,8 +378,7 @@ def newChart(id):
 @login_required
 def view_account(id):
 
-    #POST request to add entry into ledger--
-
+    # POST request to add entry into ledger
     if request.method == 'POST':
         pr = request.form.get('pr')
 
@@ -384,9 +390,15 @@ def view_account(id):
         entry_cred = request.form.get('entry_cred')
         entry_deb = request.form.get('entry_deb')
         attachment = request.form.get('attachment')
+
+        if not entry_cred:
+            entry_cred = 0.00
+        if not entry_deb:
+            entry_deb = 0.00
+
         acc_id = id
 
-        if attachment == None:
+        if attachment is None:
             attachment = "static/default.pdf"
 
         init_deb = float(entry_deb)
@@ -400,6 +412,9 @@ def view_account(id):
         db.session.add(new_entry)
         db.session.commit()
 
+        new_balance = new_entry.calculate_balance()
+        new_entry.update_balance(new_balance, commit=True)
+
         return redirect(url_for('auth.view_account', id=acc_id))
 
     return render_template('accountView.html', user=current_user, acc_id=id,
@@ -408,17 +423,6 @@ def view_account(id):
                                                                     Ledger.isApproved == 'Approved'))
 
 
-
-#Username generator
-def userNameGenGlobal(first, last):
-    currMonth = str(datetime.now().month)
-    currYear = str(datetime.now().year)
-
-    if len(currMonth) < 2:
-        currMonth = '0' + currMonth
-
-    userName = first[0] + last + currMonth + currYear[2] + currYear[3]
-    return userName
 
 
 @auth.route('/home')
@@ -469,8 +473,8 @@ def send_email():
 
 @auth.route('/approvals', methods=['GET', 'POST'])
 def approve():
-    user=current_user
-    req =request.form
+    user = current_user
+    req = request.form
     a = req.get("approve")
     r = req.get("reject")
     rc = req.get("reject_reasoning")
@@ -504,13 +508,28 @@ def income_statement():
 @auth.route('/balance_sheet/', methods=['GET','POST'])
 def balance_sheet():
     id = current_user.id
-    return render_template('balance_sheet.html', user=current_user ) #account=current_user.accounts
+    return render_template('balance_sheet.html', user=current_user)  # account=current_user.accounts
 
 
 @auth.route('/trial_balance/', methods=['GET','POST'])
 def trial_balance():
     id = current_user.id
-    return render_template('trial_balance.html', user=current_user)
+
+    """
+    acc_cat
+    acc_num
+    ledger(x).acc_num
+    
+    """
+
+
+
+    return render_template('trial_balance.html', user=current_user,
+                           accounts_list=Account.query.join(User).filter(Account.user_id == id))
+
+
+
+
 
 # --Tools---
 

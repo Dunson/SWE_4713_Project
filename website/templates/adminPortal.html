@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% block title %} Admin Portal {% endblock %} {%block
 content%}
-<h1 class="text-center">Admin Dashboard</h1>
+<h1 class="text-center">User List</h1>
 <br />
 
 </div>
@@ -34,6 +34,7 @@ content%}
           <th>Date Created</th>
           <th>Status</th>
           <th>Link</th>
+          <th>Email User</th>
         </tr>
       </thead>
 
@@ -69,6 +70,7 @@ content%}
                     </button>
                 </form>
             </td>
+            <td><a href="/email_user" class="link-primary">Send Email</a></td>
         </tr>
         {% endfor %}
       </tbody>

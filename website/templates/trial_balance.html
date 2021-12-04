@@ -1,31 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-
-{% extends "base.html" %} {% block title %} Reports {% endblock %}
+{% extends "base.html" %}
+{% block title %} Trial Balance {% endblock %}
 
 {% block content %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Reports</title>
-
-</head>
+<br>
 <body>
-        <div class="table-wrapper">
-            <h2>Trial Balance</h2>
-            <table class="table table-hover">
+    <div class="table-wrapper container">
+        <h2>Trial Balance</h2>
+
+        <table class="table table-hover table-dark">
+            <thead>
                 <th>Account Name</th>
                 <th>Debit</th>
                 <th>Credit</th>
-                <tr>
-                    <td>x</td>
-                    <td>y</td>
-                    <td>z</td>
-                </tr>
-            </table>
-            <button name="submitbutton" type="submit" class="btn btn-primary btn-block">Convert to PDF</button>
-        </div>
+            </thead>
+
+            <tbody>
+            {% for accounts in accounts_list %}
+            <tr>
+                <td>{{accounts.acc_name}}</td>
+                <td>{{accounts.entries.entry_bal}}</td>
+                <td>{{accounts.entries.entry_bal}}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <button name="submitbutton" type="submit" class="btn btn-primary btn-block">Convert to PDF</button>
+    </div>
 </body>
 
 {% endblock %}
-</html>

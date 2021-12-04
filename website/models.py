@@ -10,8 +10,10 @@ from time import time
 import os
 import jwt
 import re
+import json
 from datetime import datetime, timedelta
 import smtplib
+from sqlalchemy import func
 
 
 # Defined User table for database
@@ -114,17 +116,13 @@ class Account(db.Model):
     
     acc_num = db.Column(db.Integer, primary_key=True)  # unique identifier. Needs adjusting
     user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
-
     acc_name = db.Column(db.String(150), unique=True)
     acc_desc = db.Column(db.String(150))
     acc_cat = db.Column(db.String(150))
-   
     init_bal = db.Column(db.Float)
-    
-
     acc_statement = db.Column(db.String(150))
-   
-    db.relationship('Journal', backref='user_journals')
+    entries = db.relationship('Ledger', backref='entries', lazy=True)
+
 
     def user_balance_above_zero(self):
         if self.init_bal > 0:
@@ -145,13 +143,9 @@ class Account(db.Model):
         num = "{:,.2f}".format(n)
         return num
 
-
-# A journal holds ledger entries
-class Journal(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    date_created = db.Column(db.DateTime, nullable=False, default=datetime.now)
-    ledger_entries = db.relationship('Ledger', backref='entries')
-    assoc_acc = db.Column(db.Integer, db.ForeignKey('account.acc_num'))
+    def get_assoc_journals(self):
+        a = self.journals.id
+        return a
 
 
 class Ledger(db.Model):
@@ -163,9 +157,9 @@ class Ledger(db.Model):
     entry_cred = db.Column(db.Float)
     entry_deb = db.Column(db.Float)
     isApproved = db.Column(db.String(25), nullable=False, default="Pending")
-    journal_id = db.Column(db.Integer, db.ForeignKey('journal.id'))
     acc_num = db.Column(db.Integer, db.ForeignKey('account.acc_num'))
-    attaches = db.relationship('Attachments', backref='atts')
+    attachment = db.Column(db.BLOB, default=bytes(json.dumps("static/default.pdf"), 'utf8'))
+    reject_comment = db.Column(db.String(300), default="N/A")
 
 
     # function to format balances to comma and 2 decimal place. Must pass in a number
@@ -188,9 +182,10 @@ class Ledger(db.Model):
     def get_entry_num(self):
         return self.entry_num
 
+    def add_attachment(self, a):
+        return db.session.add(bytes(json.dumps(a), 'utf8'))
 
-# add attachments to the ledger
-class Attachments(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    attachment = db.Column(db.BLOB, nullable=False)
-    ledger_id = db.Column(db.Integer, db.ForeignKey('ledger.entry_num'))
+    def get_total(self, an):
+        query = db.session.query(func.sum(self.entry_cred)).filter_by()
+        pass
+

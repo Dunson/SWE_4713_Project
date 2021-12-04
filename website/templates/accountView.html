@@ -2,6 +2,9 @@
 {% block title %} Account View {% endblock %}
 
 {%block content%}
+    <head>
+    <h1>Journal</h1>
+    </head>
 <br>
 <div class="container-fluid" style="height: 400px">
     <h2>Ledger for Account: {{acc_query[acc_ID | int].acc_name}}</h2>
@@ -14,6 +17,7 @@
             <th scope="col">Debit</th>
             <th scope="col">Credit</th>
             <th scope="col">Balance</th>
+              <th scope="col">PR</th>
           </tr>
         </thead>
         <tbody style="overflow-y: scroll;">
@@ -26,6 +30,7 @@
             <td>{{ledger.entry_deb}}</td>
             <td>{{ledger.entry_cred}}</td>
             <td>${{ledger.entry_bal}}</td>
+          <td><a href="/accountOverview/{{ ledger.acc_num }}">Post Reference</a></td>
           </tr>
           {% endfor %}
           

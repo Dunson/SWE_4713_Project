@@ -3,6 +3,7 @@
 
 {%block content%}
 <br>
+    {% if user.hasAdmin == True %}
 <div class="container pb-3 pl-3 pr-3" style="position: absolute; left: 10px; top: 100px; width: 250px; height: 50px;">
     <h3 class="text-center text-dark">User Information</h3>
     <div class=" container bg-dark text-light pl-2">
@@ -12,7 +13,7 @@
         <br>
         Status: {% if query[searchID | int - 1].status == True %} Activated {% else %} Deactivated {% endif %}
         <br>
-        Type: {% if query[searchID | int - 1].hasAdmin %} Admininstrator {% elif query[searchID | int - 1].hasMan%} Manager {% else %} User {% endif %}
+        Type: {% if query[searchID | int - 1].hasAdmin %} Administrator {% elif query[searchID | int - 1].hasMan%} Manager {% else %} User {% endif %}
       </p>
     </div>
 
@@ -128,7 +129,7 @@
     </div>
 
 </div>
-
+    {% endif %}
 <div class="container text-light pb-2" style="position: absolute; top: 100px; width: 1100px;">
   <form class ="form-inline" method="POST">
   <h2 class="text-dark">Chart of Accounts</h2>
@@ -164,16 +165,13 @@
           <td>{{account.acc_desc}}</td>
           <td>{{account.acc_cat}}</td>
           <td>{{account.acc_statement}}</td>
-
           <td>
             <form method="POST" >
                 <button type="submit" name = "get_account" class="btn btn-success" value="{{ account.acc_num }}">
-                    View Account
+                    View Journal
                 </button>
             </form>
         </td>
-        
-        
         </tr>
         {% endfor %}
       </tbody>
@@ -181,7 +179,7 @@
   </div>
 
   <div class="text-center">
-    <a class = "btn btn-success" type="button" href="/newAccount/{{user.id}}">New Account</a>
+    <form method="POST"><button name="new_account" class = "btn btn-success" type="sumbit" value="{{searchID}}" >New Account</button></form>
   </div>
 
 </div>

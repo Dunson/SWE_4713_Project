@@ -475,7 +475,7 @@ def approve():
     r = req.get("reject")
     rc = req.get("reject_reasoning")
 
-    if rc == None:
+    if not rc:
         rc = "N/A"
 
     if request.method == "POST":

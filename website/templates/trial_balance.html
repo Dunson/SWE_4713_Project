@@ -26,16 +26,16 @@
                 {% endif %}
 
                 {% if temp_arr[x] < 0 %}
-                <td>{{temp_arr[x]*-1}}</td>
+                <td>{{temp_arr[x] * -1}}</td>
                 {% else %}
                 <td> </td>
                 {% endif %}
             </tr>
             {% endfor %}
             <tr>
-                <td></td>
+                <td>Total</td>
                 <td>$ {{total_deb}}</td>
-                <td>$ ({{total_cred*-1}})</td>
+                <td>$ ({{total_cred * -1}})</td>
             </tr>
             </tbody>
         </table>

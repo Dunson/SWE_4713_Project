@@ -4,6 +4,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import redirect
 from .models import User, Account, Ledger
 from .auth import ACC_ID
+from .auth import lpc
 
 
 views = Blueprint('views', __name__)
@@ -19,4 +20,7 @@ def home():
         return redirect(url_for('auth.view_account'))
 
     return render_template("home.html", user=current_user,  acc_query=Account.query.join(User),
-                           usracc=Account.query.join(User).filter(User.id == current_user.id))
+                           usracc=Account.query.join(User).filter(User.id == current_user.id), lpc=lpc())
+
+
+# --- notification ledger query ---

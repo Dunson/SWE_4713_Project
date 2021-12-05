@@ -3,7 +3,7 @@ from smtplib import SMTPAuthenticationError
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from sqlalchemy.orm import query
-from .models import User, Account, Ledger, Error
+from .models import User, Account, Ledger, Error, EventLog
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db, mail
 from flask_login import login_user, login_required, logout_user, current_user
@@ -37,6 +37,7 @@ reset_token_expired = 'Reset Token Expired!'
 no_blank = 'Input field can not be blank.'
 acc_ufail = 'Account Update Failed!'
 exceeded_att = 'You have exceeded maximum login attempts.'
+unbalanced = 'Trial Balance does not balance to zero. Please check all ledger entries in accounts.'
 
 
 def add_err_to_db(err):
@@ -90,14 +91,14 @@ def login():
             if ATTEMPT_COUNT > 3:
                 flash('You have exceeded maximum login attempts. Your account has been deactivated.', category='error')
                 User.deactivate_user(user, commit = True)
-                return render_template('login.html', user=current_user)
+                return render_template('login.html', user=current_user, lpc=lpc())
 
         else:
             flash(fields_empty, category='error')
             error = Error(error_desc=fields_empty)
             db.session.add(error)
             error.errorcreate(fields_empty, commit=True)
-    return render_template("login.html", user=current_user)
+    return render_template("login.html", user=current_user, lpc=lpc())
 
 
 @auth.route('/logout')
@@ -117,7 +118,7 @@ def sign_up():
         password_one = request.form.get('password1')
         password_two = request.form.get('password2')
 
-        print(password_one,password_two)
+        print(password_one, password_two)
 
         user_init = User()
 
@@ -152,14 +153,16 @@ def sign_up():
                             userName=userNameGenGlobal(firstName, lastName),
                             hasAdmin=False, hasMan=False, status=False,
                             creationDate=datetime.now(), expirationDate=datetime.now() + timedelta(days=365))
-
+            event = EventLog(creator=User.query.get(current_user.id).userName, event=f'New user {userNameGenGlobal(firstName,lastName)} added',
+                             event_date=str(NOW.strftime("%Y-%m-%d, %H:%M:%S")))
+            db.session.add(event)
             db.session.add(new_user)
             db.session.commit()
 
             flash('Account Created! Note: The admininstrator must activate your account before you can login.', category='success')
             return redirect(url_for('auth.login'))
 
-    return render_template("signUp.html", user=current_user)
+    return render_template("signUp.html", user=current_user, lpc=lpc())
 
 
 @auth.route('/recovery', methods=['GET', 'POST'])
@@ -177,9 +180,13 @@ def recovery_Page():
         else:
             send_recovery(user)
             flash('Recovery email sent!', category='success')
+            event = EventLog(creator=User.query.get(current_user.id).userName, event= f'Recovery email sent for {user.userName}',
+                             event_date=str(NOW.strftime("%Y-%m-%d, %H:%M:%S")))
+            db.session.add(event)
+            db.session.commit()
             return redirect(url_for('auth.login'))
 
-    return render_template('passwordRecov.html', user=current_user)
+    return render_template('passwordRecov.html', user=current_user, lpc=lpc())
 
 
 @auth.route('/reset_verified/<token>', methods=['GET', 'POST'])
@@ -209,7 +216,11 @@ def reset_password(token):
                 return redirect(url_for('auth.reset_password', token=token))
 
             user.reset_password(password1, commit=True)
-            flash('Password Reset Successful!!', category='success')
+            flash('Password Reset Successful!', category='success')
+            event = EventLog(creator=User.query.get(current_user.id).userName, event=f'Password reset for {user}',
+                             event_date=str(NOW.strftime("%Y-%m-%d, %H:%M:%S")))
+            db.session.add(event)
+            db.session.commit()
             return redirect(url_for('auth.login'))
         else:
             flash(mismatch_pw, category='error')
@@ -217,7 +228,7 @@ def reset_password(token):
             db.session.add(error)
             error.errorcreate(mismatch_pw, commit=True)
 
-    return render_template('reset_verified.html', user=current_user)
+    return render_template('reset_verified.html', user=current_user, lpc=lpc())
 
 
 # Method for admin dashboard
@@ -249,7 +260,7 @@ def adminPort():
 
         if current_user.hasAdmin or current_user.hasMan:
             return render_template('adminPortal.html',
-                                   user=current_user, query=User.query.all())
+                                   user=current_user, query=User.query.all(), lpc=lpc())
         else:
             flash(no_access, category='error')
             error = Error(error_desc=no_access)
@@ -308,7 +319,11 @@ def accountOverview(id):
 
                 if updateStat:
                     flash('Account updated successfully', category='success')
-                    return redirect(url_for('auth.accountOverview',id = id))
+                    event = EventLog(creator=User.query.get(current_user.id).userName, event=f'Account {userName} updated',
+                                     event_date=str(NOW.strftime("%Y-%m-%d, %H:%M:%S")))
+                    db.session.add(event)
+                    db.session.commit()
+                    return redirect(url_for('auth.accountOverview', id=id))
                 else:
                     flash(acc_ufail, category='error')
                     error = Error(error_desc=acc_ufail)
@@ -339,7 +354,8 @@ def accountOverview(id):
         return redirect(url_for('views.home'))
 
     return render_template('accountOverview.html', user=current_user, query=User.query.all(),
-                           searchID=id, acc_query=Account.query.join(User).filter(Account.user_id == id))
+                           searchID=id, acc_query=Account.query.join(User).filter(Account.user_id == id),
+                            lpc=lpc())
 
 
 
@@ -363,6 +379,9 @@ def newChart(id):
                             user_id=qID)
         
         db.session.add(new_acc)
+        event = EventLog(creator=User.query.get(current_user.id).userName, event='New Account added',
+                         event_date=str(NOW.strftime("%Y-%m-%d, %H:%M:%S")))
+        db.session.add(event)
         db.session.commit()
         return redirect(url_for('auth.accountOverview', id=id))
     
@@ -410,6 +429,9 @@ def view_account(id):
                            isApproved='Pending', acc_num=acc_id, attachment=bytes(json.dumps(attachment), 'utf8'),
                            reject_comment="N/A")
         db.session.add(new_entry)
+        event = EventLog(creator=User.query.get(current_user.id).userName, event='New Ledger entry added',
+                         event_date=str(NOW.strftime("%Y-%m-%d, %H:%M:%S")))
+        db.session.add(event)
         db.session.commit()
 
         new_balance = new_entry.calculate_balance()
@@ -420,7 +442,8 @@ def view_account(id):
     return render_template('accountView.html', user=current_user, acc_id=id,
                         acc_query=Account.query.join(User).filter(Account.user_id == id),
                         led_query=Ledger.query.join(Account).filter(Ledger.acc_num == id,
-                                                                    Ledger.isApproved == 'Approved'))
+                                                                    Ledger.isApproved == 'Approved'),
+                        lpc=lpc())
 
 
 
@@ -428,17 +451,17 @@ def view_account(id):
 @auth.route('/home')
 def homepage():
     return render_template("home.html", user=current_user, acc_query=Account.query.join(User),
-                           usracc=Account.query.join(User).filter(User.id == current_user.id))
+                           usracc=Account.query.join(User).filter(User.id == current_user.id), lpc=lpc())
 
 
 @auth.route('/help')
 def help():
-    return render_template("help.html", user=current_user)
+    return render_template("help.html", user=current_user, lpc=lpc())
 
 
 @auth.route('/email_user')
 def e():
-    return render_template("email_user.html", user=current_user)
+    return render_template("email_user.html", user=current_user, lpc=lpc())
 
 
 @auth.route('/email_user', methods=['POST', 'GET'])
@@ -461,6 +484,10 @@ def send_email():
 
         try:
             mail.send(msg)
+            event = EventLog(creator=User.query.get(current_user.id).userName, event='Email sent',
+                             event_date=str(NOW.strftime("%Y-%m-%d, %H:%M:%S")))
+            db.session.add(event)
+            db.session.commit()
         except SMTPAuthenticationError:
             flash(email_error, category='error')
             error = Error(error_desc=email_error)
@@ -469,7 +496,7 @@ def send_email():
             flash("Emaill successfully sent, you may leave this page or send more emails.", category='Success')
             return render_template('email_user.html', user=user)
 
-    return render_template('email_user.html', user=user)
+    return render_template('email_user.html', user=user, lpc=lpc())
 
 @auth.route('/approvals', methods=['GET', 'POST'])
 def approve():
@@ -486,50 +513,78 @@ def approve():
         if a:
             approval_query = Ledger.query.filter_by(entry_num=int(a)).first()
             approval_query.isApproved = 'Approved'
+            event = EventLog(creator=User.query.get(current_user.id).userName, event='Ledger entry approved',
+                             event_date=str(NOW.strftime("%Y-%m-%d, %H:%M:%S")))
+            db.session.add(event)
         elif r:
             rejection_query = Ledger.query.filter_by(entry_num=int(r)).first()
             rejection_query.isApproved = 'Rejected'
             rejection_query.reject_comment = rc
+            event = EventLog(creator=User.query.get(current_user.id).userName, event='Ledger entry rejected',
+                             event_date=str(NOW.strftime("%Y-%m-%d, %H:%M:%S")))
+            db.session.add(event)
 
         db.session.commit()
 
     return render_template('approvals.html', user=user, ledgerq=Ledger.query.filter_by(isApproved='Pending'),
                            rejected_entries=Ledger.query.filter_by(isApproved='Rejected'),
                            approved_entries=Ledger.query.filter_by(isApproved='Approved'),
-                           all=Ledger.query.all())
+                           all=Ledger.query.all(), lpc=lpc())
 
 
 @auth.route('/income_statement/', methods=['GET','POST'])
 def income_statement():
     id = current_user.id
-    return render_template('income_statement.html', user=current_user)
+    return render_template('income_statement.html', user=current_user, lpc=lpc())
 
 
 @auth.route('/balance_sheet/', methods=['GET','POST'])
 def balance_sheet():
     id = current_user.id
-    return render_template('balance_sheet.html', user=current_user)  # account=current_user.accounts
+    return render_template('balance_sheet.html', user=current_user, lpc=lpc())  # account=current_user.accounts
+
+
 
 
 @auth.route('/trial_balance/', methods=['GET','POST'])
 def trial_balance():
     id = current_user.id
 
-    """
-    acc_cat
-    acc_num
-    ledger(x).acc_num
-    
-    """
+    select_id = 1
+    if request.method == "POST":
+        select_id = request.form.get("ian")
+        redirect('auth.trial_balance')
+
+    account_list_by_cat = Account.query.filter_by(user_id=select_id).all()
+    accounts_list = Account.query.join(User).filter(Account.user_id == select_id).all()
+
+    temp_arr = []
+    for item in account_list_by_cat:
+        temp_arr.append(item.total(item.acc_num))
+
+    creds = [x for x in temp_arr if x < 0]
+    debs = [x for x in temp_arr if x > 0]
 
 
+    if sum(creds) + sum(debs) != 0:
+        flash(unbalanced, category="error")
+        error = Error(error_desc=unbalanced)
+        db.session.add(error)
+        error.errorcreate(unbalanced, commit=True)
+    else:
+        flash("Trial Balance balances to 0!", category='success')
 
     return render_template('trial_balance.html', user=current_user,
-                           accounts_list=Account.query.join(User).filter(Account.user_id == id))
+                           accounts_list=Account.query.join(User).filter(Account.user_id == select_id),
+                           temp_arr=temp_arr, creds=creds, debs=debs,
+                           total_deb=sum(debs), total_cred=sum(creds), j=len(accounts_list),
+                           lpc=lpc(), s=select_id)
 
 
-
-
+@auth.route('/event_log/', methods=['GET', 'POST'])
+def evlog():
+    evall = EventLog.query.all()
+    return render_template('event_log.html', evall=evall, user=current_user, lpc=lpc())
 
 # --Tools---
 
@@ -544,6 +599,7 @@ def userNameGenGlobal(first, last):
     userName = first[0] + last + currMonth + currYear[2] + currYear[3]
     return userName
 
+
 def update_log_attempt(count):
     count +=1
     return count
@@ -552,6 +608,20 @@ def update_log_attempt(count):
 def calculate_balance(prev_entry, curr_entry):
     return prev_entry + curr_entry
 
+
 def format_balance(float_variable):
     formated_float = '{:.2f}'.format(float_variable)
     return formated_float
+
+
+def lpc():
+    ledger_pending_count = db.session.query(Ledger).filter(Ledger.isApproved == 'Pending').all()
+    lpc = len(ledger_pending_count)
+    return lpc
+
+ # Assets -- DEBIT
+    # Expenses -- DEBIT
+    # Liabilities -- CREDIT
+    # Equity -- DEBIT
+    # Revenue -- CREDIT
+    # Other ... -- DOESNT MATTER

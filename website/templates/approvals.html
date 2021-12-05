@@ -27,9 +27,11 @@
           <th>Date Created</th>
           <th>Description</th>
           <th>Approval Status</th>
+            {% if user.hasMan or user.hasAdmin %}
           <th>Approve</th>
           <th>Reject</th>
           <th>Reject Reasoning</th>
+            {% endif %}
         </tr>
       </thead>
 
@@ -48,9 +50,11 @@
           {% else %}
           <td style="color: red">Rejected</td>
           {% endif %}
+            {% if user.hasAdmin or user.hasMan %}
           <td><form method="post"><button name="approve" type="submit" class="btn btn-success" value="{{ ledger.entry_num }}">Approve</button></form></td>
           <td><form method="post"><button name="reject" type="submit" class="btn btn-danger" value="{{ ledger.entry_num }}">Reject</button></td>
             <td><input name="reject_reasoning" type="text" class="form-control"></td></form>
+            {% endif %}
         </tr>
         {% endfor %}
       </tbody>

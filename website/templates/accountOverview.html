@@ -18,7 +18,7 @@
     </div>
 
     <div class="text-center">
-      <button type="button" class="btn btn-success" data-toggle="modal" data-target="#editaccountmodal">
+      <button type="button" title="Edit this users information" class="btn btn-success" data-toggle="modal" data-target="#editaccountmodal">
         Edit
       </button>
     </div>
@@ -163,7 +163,7 @@
           <td>{{account.acc_statement}}</td>
           <td>
             <form method="POST" >
-                <button type="submit" name = "get_account" class="btn btn-success" value="{{ account.acc_num }}">
+                <button type="submit" title="View the Journal associated with this Journal ID" name = "get_account" class="btn btn-success" value="{{ account.acc_num }}">
                     View Journal
                 </button>
             </form>
@@ -175,7 +175,7 @@
   </div>
 
   <div class="text-center">
-    <form method="POST"><button name="new_account" class = "btn btn-success" type="sumbit" value="{{searchID}}" >New Account</button></form>
+    <form method="POST"><button name="new_account" title="Create a new Account for this User" class = "btn btn-success" type="sumbit" value="{{searchID}}" >New Account</button></form>
   </div>
 
 </div>

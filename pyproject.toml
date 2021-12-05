@@ -12,6 +12,11 @@ Flask-Mail = "^0.9.1"
 Flask-SQLAlchemy = "^2.5.1"
 werkzeug = "^2.0.1"
 jwt = "^1.2.0"
+wkhtmltopdf = "^0.2"
+pdfkit = "^1.0.0"
+Flask-WeasyPrint = "^0.6"
+weasyprint = "^53.4"
+gobject = "^0.1.0"
 
 [tool.poetry.dev-dependencies]
 

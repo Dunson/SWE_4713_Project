@@ -16,16 +16,30 @@
             </thead>
 
             <tbody>
-            {% for accounts in accounts_list %}
+            {% for x in range(j) %}
             <tr>
-                <td>{{accounts.acc_name}}</td>
-                <td>{{accounts.entries.entry_bal}}</td>
-                <td>{{accounts.entries.entry_bal}}</td>
+                <td>{{accounts_list[x].acc_name}}</td>
+                {% if temp_arr[x] > 0 %}
+                <td>{{temp_arr[x]}}</td>
+                {% else %}
+                <td> </td>
+                {% endif %}
+
+                {% if temp_arr[x] < 0 %}
+                <td>{{temp_arr[x]*-1}}</td>
+                {% else %}
+                <td> </td>
+                {% endif %}
             </tr>
             {% endfor %}
+            <tr>
+                <td></td>
+                <td>$ {{total_deb}}</td>
+                <td>$ ({{total_cred*-1}})</td>
+            </tr>
             </tbody>
         </table>
-        <button name="submitbutton" type="submit" class="btn btn-primary btn-block">Convert to PDF</button>
+        <form method="post"><button name="convert" type="submit" class="btn btn-primary btn-block">Convert to PDF</button></form>
     </div>
 </body>
 

@@ -64,11 +64,21 @@ def login():
             if user.hasAdmin == True and check_password_hash(user.password, password):
                 flash('Admin login successful!', category='success')
                 login_user(user)
+                event = EventLog(creator=User.query.get(current_user.id).userName,
+                                 event=f'User: {user.userName} logged in',
+                                 event_date=str(NOW.strftime("%Y-%m-%d, %H:%M:%S")))
+                db.session.add(event)
+                db.session.commit()
                 return redirect(url_for('auth.adminPort'))
 
             if check_password_hash(user.password, password):
                 flash('Login Successful!', category='success')
                 login_user(user)
+                event = EventLog(creator=User.query.get(current_user.id).userName,
+                                 event=f'User: {user.userName} logged in',
+                                 event_date=str(NOW.strftime("%Y-%m-%d, %H:%M:%S")))
+                db.session.add(event)
+                db.session.commit()
 
                 return redirect(url_for('views.home'))
             else:
@@ -81,6 +91,11 @@ def login():
             if check_password_hash(user.password, password):
                 flash('Login Successful!', category='success')
                 login_user(user)
+                event = EventLog(creator=User.query.get(current_user.id).userName,
+                                 event=f'User: {user.userName} logged in',
+                                 event_date=str(NOW.strftime("%Y-%m-%d, %H:%M:%S")))
+                db.session.add(event)
+                db.session.commit()
                 global ATTEMPT_COUNT
                 ATTEMPT_COUNT = 0
                 return redirect(url_for('views.home'))
@@ -388,7 +403,7 @@ def newChart(id):
 
     return render_template('newAccount.html', user = current_user, 
                         query = User.query.all(), 
-                        searchID = SEARCHID)
+                        searchID = SEARCHID, lpc=lpc())
 
 
 
@@ -542,8 +557,13 @@ def income_statement():
 def balance_sheet():
     id = current_user.id
 
-    accounts_list_by_user = Account.query.filter_by(user_id=id).all()
-    accounts_list = Account.query.join(User).filter(Account.user_id == id).all()
+    select_id = 1
+    if request.method == "POST":
+        select_id = request.form.get("ian")
+        redirect('auth.balance_sheet')
+
+    accounts_list_by_user = Account.query.filter_by(user_id=select_id).all()
+    accounts_list = Account.query.join(User).filter(Account.user_id == select_id).all()
 
     temp_arr = []
     for item in accounts_list_by_user:
@@ -574,7 +594,7 @@ def balance_sheet():
                            assets_list=assets_list, expenses_list=expenses_list, equity_list=equity_list,
                            rev_list=rev_list, liab_list=liab_list, other_list=other_list,
                            ass_list_len=len(assets_list), exp_list=len(expenses_list), eq_list=len(equity_list),
-                           rev_list_len=len(rev_list), lpc=lpc())
+                           rev_list_len=len(rev_list), lpc=lpc(), usrsel=User.query.get(select_id))
 
 
 @auth.route('/trial_balance/', methods=['GET','POST'])
@@ -609,7 +629,7 @@ def trial_balance():
                            accounts_list=Account.query.join(User).filter(Account.user_id == select_id),
                            temp_arr=temp_arr, creds=creds, debs=debs,
                            total_deb=sum(debs), total_cred=sum(creds), j=len(accounts_list),
-                           lpc=lpc(), s=select_id)
+                           lpc=lpc(), s=select_id, usrsel=User.query.get(select_id))
 
 
 @auth.route('/event_log/', methods=['GET', 'POST'])

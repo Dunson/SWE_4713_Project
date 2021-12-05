@@ -403,7 +403,7 @@ def newChart(id):
 
     return render_template('newAccount.html', user = current_user, 
                         query = User.query.all(), 
-                        searchID = SEARCHID)
+                        searchID = SEARCHID, lpc=lpc())
 
 
 

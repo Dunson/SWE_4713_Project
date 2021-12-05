@@ -29,8 +29,8 @@
             <td>{{ledger.entry_desc}}</td>
             <td>{{ledger.entry_deb}}</td>
             <td>{{ledger.entry_cred}}</td>
-            <td>${{ledger.entry_bal}}</td>
-            <td><form method="post"><button name="pr" type="submit" class="btn btn-primary" value="{{ ledger.acc_num }}">Link</button></form></td>
+            <td>$ {{ledger.entry_bal}}</td>
+            <td><form method="post"><button name="pr" type="submit" class="btn btn-primary" value="{{ ledger.acc_num }}">Post Ref.</button></form></td>
           </tr>
           {% endfor %}
           
@@ -56,7 +56,7 @@
               <div class="row">
                 <div class="col">
                   <div class="form-group">
-                    <label for="firstName">Debit Amount</label>
+                    <label>Debit Amount</label>
                     <input
                       type="number"
                       step=".01"
@@ -68,7 +68,7 @@
                 </div>
                 <div class="col">
                   <div class="form-group">
-                    <label for="lastName">Credit Amount</label>
+                    <label>Credit Amount</label>
                     <input
                       type="number"
                       step=".01"
@@ -81,7 +81,7 @@
                 </div>
               <div class="row">
               <div class="col">
-                  <label for="acc_desc">Description</label>
+                  <label>Description</label>
                   <textarea
                     type="text"
                     class="form-control"
@@ -91,7 +91,7 @@
                 </div>
               </div>
                <div class="col">
-                  <label for="att_file">Input Attachment</label>
+                  <label>Input Attachment</label>
                   <input type="file" class="form-control" name="attachment" id="attachment" />
               </div>
             <div class="modal-footer">
@@ -104,6 +104,6 @@
       </div>
     </div>
 
-
+</div>
 
 {% endblock %}

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import backref
 
-from werkzeug.datastructures import _CacheControl
+# from werkzeug.datastructures import _CacheControl
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from . import db 
@@ -121,8 +121,7 @@ class Account(db.Model):
     acc_cat = db.Column(db.String(150))
     init_bal = db.Column(db.Float)
     acc_statement = db.Column(db.String(150))
-    entries = db.relationship('Ledger', backref='entries', lazy=True)
-
+    entries = db.relationship("Ledger", backref='entries', lazy=True)
 
     def user_balance_above_zero(self):
         if self.init_bal > 0:
@@ -161,7 +160,6 @@ class Ledger(db.Model):
     attachment = db.Column(db.BLOB, default=bytes(json.dumps("static/default.pdf"), 'utf8'))
     reject_comment = db.Column(db.String(300), default="N/A")
 
-
     # function to format balances to comma and 2 decimal place. Must pass in a number
     def format_led_balance(self, n):
         num = "{:,.2f}".format(n)
@@ -177,7 +175,7 @@ class Ledger(db.Model):
     def update_balance(self, new_balance, commit=False):
         self.entry_bal = new_balance
         if commit:
-            commit=True
+            db.session.commit()
 
     def get_entry_num(self):
         return self.entry_num
@@ -185,7 +183,22 @@ class Ledger(db.Model):
     def add_attachment(self, a):
         return db.session.add(bytes(json.dumps(a), 'utf8'))
 
+    def calculate_balance(self):
+
+        list_acc_led = db.session.query(Ledger).filter(Ledger.acc_num == self.acc_num,
+                                                       Ledger.isApproved == "Approved")
+        approved_entries = [0]
+        for item in list_acc_led:
+            approved_entries.append(item.entry_bal)
+
+        size = len(approved_entries)
+
+        corrected_balance = approved_entries[size - 1] + self.entry_bal
+
+        return corrected_balance
+
+    """
     def get_total(self, an):
         query = db.session.query(func.sum(self.entry_cred)).filter_by()
         pass
-
+    """

@@ -12,8 +12,7 @@ import jwt
 import re
 import json
 from datetime import datetime, timedelta
-import smtplib
-from sqlalchemy import func
+
 
 
 # Defined User table for database
@@ -155,13 +154,23 @@ class Account(db.Model):
 
         return sum(approved_entries)
 
+    def led_bal(self):
+        list_acc_led = db.session.query(Ledger).filter(Ledger.acc_num == self.acc_num,
+                                                       Ledger.isApproved == "Approved").all()
+
+        if not list_acc_led:
+            return 0
+        most_recent = list_acc_led[-1]
+        if most_recent:
+            return most_recent.entry_bal
+
+
 
 class EventLog(db.Model):
     key = db.Column(db.Integer, primary_key=True, autoincrement=True)
     creator = db.Column(db.String(150), nullable=False)
     event = db.Column(db.String(150), nullable=False)
     event_date = db.Column(db.String(150), nullable=False)
-
 
 class Ledger(db.Model):
 
@@ -213,8 +222,3 @@ class Ledger(db.Model):
 
         return corrected_balance
 
-    """
-    def get_total(self, an):
-        query = db.session.query(func.sum(self.entry_cred)).filter_by()
-        pass
-    """

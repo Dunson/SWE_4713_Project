@@ -11,8 +11,11 @@ from .email import send_recovery
 from datetime import datetime, timedelta
 from flask_mail import Mail, Message
 import json
+# from flask_weasyprint import HTML, render_pdf
+
+
 auth = Blueprint('auth', __name__)
-from sqlalchemy.sql import func
+
 
 #GLOBAL Variables
 SEARCHID = 'none'
@@ -37,6 +40,7 @@ reset_token_expired = 'Reset Token Expired!'
 no_blank = 'Input field can not be blank.'
 acc_ufail = 'Account Update Failed!'
 exceeded_att = 'You have exceeded maximum login attempts.'
+unbalanced = 'Trial Balance does not balance to zero. Please check all ledger entries in accounts.'
 
 
 def add_err_to_db(err):
@@ -512,23 +516,38 @@ def balance_sheet():
     return render_template('balance_sheet.html', user=current_user)  # account=current_user.accounts
 
 
+
+
 @auth.route('/trial_balance/', methods=['GET','POST'])
 def trial_balance():
     id = current_user.id
 
-    """
-    acc_cat
-    acc_num
-    ledger(x).acc_num
-    
-    """
+    account_list_by_cat = Account.query.filter_by(user_id=id).all()
+    accounts_list = Account.query.join(User).filter(Account.user_id == id).all()
 
+    temp_arr = []
+    for item in account_list_by_cat:
+        temp_arr.append(item.total(item.acc_num))
 
+    creds = [x for x in temp_arr if x < 0]
+    debs = [x for x in temp_arr if x > 0]
+
+    if sum(creds) + sum(debs) != 0:
+        flash(unbalanced, category="error")
+        error = Error(error_desc=unbalanced)
+        db.session.add(error)
+        error.errorcreate(unbalanced, commit=True)
+    else:
+        flash("Trial Balance balances to 0!", category='success')
+
+    if request.method == "POST":
+        # pdf_convert = request.form.get('convert')
+        redirect(url_for('auth.trial_balance_pdf', name=id))
 
     return render_template('trial_balance.html', user=current_user,
-                           accounts_list=Account.query.join(User).filter(Account.user_id == id))
-
-
+                           accounts_list=Account.query.join(User).filter(Account.user_id == id),
+                           temp_arr = temp_arr, creds=creds, debs=debs,
+                           total_deb=sum(debs), total_cred=sum(creds), j=len(accounts_list))
 
 
 
@@ -556,3 +575,11 @@ def calculate_balance(prev_entry, curr_entry):
 def format_balance(float_variable):
     formated_float = '{:.2f}'.format(float_variable)
     return formated_float
+
+
+ # Assets -- DEBIT
+    # Expenses -- DEBIT
+    # Liabilities -- CREDIT
+    # Equity -- DEBIT
+    # Revenue -- CREDIT
+    # Other ... -- DOESNT MATTER

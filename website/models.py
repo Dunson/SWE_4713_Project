@@ -146,6 +146,15 @@ class Account(db.Model):
         a = self.journals.id
         return a
 
+    def total(self, account_id):
+        list_acc_led = db.session.query(Ledger).filter(Ledger.acc_num == account_id,
+                                                       Ledger.isApproved == "Approved")
+        approved_entries = [0]
+        for item in list_acc_led:
+            approved_entries.append(item.entry_bal)
+
+        return sum(approved_entries)
+
 
 class Ledger(db.Model):
 

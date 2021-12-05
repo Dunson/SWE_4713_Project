@@ -51,8 +51,8 @@
           <td style="color: red">Rejected</td>
           {% endif %}
             {% if user.hasAdmin or user.hasMan %}
-          <td><form method="post"><button name="approve" type="submit" class="btn btn-success" value="{{ ledger.entry_num }}">Approve</button></form></td>
-          <td><form method="post"><button name="reject" type="submit" class="btn btn-danger" value="{{ ledger.entry_num }}">Reject</button></td>
+          <td><form method="post"><button name="approve" title="Approve of the associated Journal Entry" type="submit" class="btn btn-success" value="{{ ledger.entry_num }}">Approve</button></form></td>
+          <td><form method="post"><button name="reject" type="submit" title="Reject the associated Journal Entry" class="btn btn-danger" value="{{ ledger.entry_num }}">Reject</button></td>
             <td><input name="reject_reasoning" type="text" class="form-control"></td></form>
             {% endif %}
         </tr>

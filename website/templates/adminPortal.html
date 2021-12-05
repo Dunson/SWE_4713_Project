@@ -60,7 +60,7 @@ content%}
           {% endif %}
             <td>
                 <form method="POST" >
-                    <button type="submit" name = "get_user" class="btn btn-success" value="{{ user.id }}">
+                    <button title="View the Account associated with the user ID" type="submit" name = "get_user" class="btn btn-success" value="{{ user.id }}">
                       View User Account
                     </button>
                 </form>
@@ -75,8 +75,8 @@ content%}
 
 </div>
 <h1 class="text-center">Other Features</h1>
-    <a class="btn btn-primary btn-lg btn-block" href="/event_log" role="button">Event Log</a>
-    <a class="btn btn-primary btn-lg btn-block" href="/email_user" role="button">Email User</a>
+    <a class="btn btn-primary btn-lg btn-block" title="View the event log from user interactions" href="/event_log" role="button">Event Log</a>
+    <a class="btn btn-primary btn-lg btn-block" title="Email an User" href="/email_user" role="button">Email User</a>
 </div>
 
 <br>

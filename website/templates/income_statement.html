@@ -1,41 +1,67 @@
-<!DOCTYPE html>
-<html lang="en">
 
 {% extends "base.html" %} {% block title %} Reports {% endblock %}
 
 {% block content %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Reports</title>
 
-</head>
 <body>
-        <div class="table-wrapper">
+        <div class="table-wrapper container">
             <h2>Income Statement</h2>
             <table class="table table-hover table-dark">
+
+                <form method="post">
+                    <div class="form-group">
+                        <label for="formGroupExampleInput">Input User ID</label>
+                        <input type="text" class="form-control" name='ian' id="ian" placeholder="Current Account is: {{ s, usrsel.userName }}">
+                    </div>
+                 </form>
+
+                <thead>
                 <th>Revenues</th>
-                <tr>
-                    <th>Description</th>
-                    <th>Revenue</th>
-                </tr>
-                <tr>
-                    <td>x</td>
-                    <td>y</td>
-                </tr>
-                <th>Expenses</th>
-                <tr>
-                    <th>Description</th>
-                    <th>Expense</th>
-                </tr>
-                <tr>
-                    <td>x</td>
-                    <td>y</td>
-                </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <thead>
+                            <th>Name</th>
+                            <th>Revenue</th>
+                        </thead>
+                    </tr>
+                    <tbody>
+                        {% for x in range(rev_size)%}
+                        <tr>
+                            <td>{{revenues_list[x].acc_name}}</td>
+                            <td>{{revenues_list[x].led_bal() * -1}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <thead>
+                        <th>Expenses</th>
+                    </thead>
+
+                    <tbody>
+                    <tr>
+                        <thead>
+                            <th>Name</th>
+                            <th>Expense</th>
+                        </thead>
+                    </tr>
+
+                    {% for x in range(exp_size) %}
+                    <tr>
+                        <td>{{expense_list[x].acc_name}}</td>
+                        <td>{{expense_list[x].led_bal()}}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+
+                    <tr>
+                        <td>Total Income</td>
+                        <td>{{total_income * -1}}</td>
+                    </tr>
+                </tbody>
             </table>
-            <button name="submitbutton" type="submit" class="btn btn-primary btn-block">Convert to PDF</button>
+            <button onclick="window.print();" class="btn btn-success btn-block" >Print/Download PDF of Balance Sheet</button>
         </div>
 </body>
-
 {% endblock %}
-</html>

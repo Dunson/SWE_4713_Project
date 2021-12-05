@@ -388,7 +388,7 @@ def newChart(id):
 
     return render_template('newAccount.html', user = current_user, 
                         query = User.query.all(), 
-                        searchID = SEARCHID)
+                        searchID = SEARCHID, lpc=lpc())
 
 
 
@@ -535,7 +535,35 @@ def approve():
 @auth.route('/income_statement/', methods=['GET','POST'])
 def income_statement():
     id = current_user.id
-    return render_template('income_statement.html', user=current_user, lpc=lpc())
+
+    select_id = 1
+    if request.method == "POST":
+        select_id = request.form.get("ian")
+        redirect('auth.balance_sheet')
+
+    accounts_list_by_user = Account.query.filter_by(user_id=select_id).all()
+
+    temp_arr = []
+    for item in accounts_list_by_user:
+        temp_arr.append(item)
+
+    revenues_list = [x for x in temp_arr if x.acc_cat == "Revenue (income)"]
+    expense_list = [x for x in temp_arr if x.acc_cat == "Expenses"]
+
+    total_rev = 0
+    for item in revenues_list:
+        total_rev += item.led_bal()
+
+    total_exp = 0
+    for item in expense_list:
+        total_exp += item.led_bal()
+
+    total_income = total_rev - (total_exp * -1)
+
+    return render_template('income_statement.html', user=current_user, lpc=lpc(),
+                           revenues_list=revenues_list, expense_list=expense_list,
+                           rev_size = len(revenues_list), exp_size=len(expense_list),
+                           total_income=total_income, s=select_id, usrsel=User.query.get(select_id))
 
 
 @auth.route('/balance_sheet/', methods=['GET','POST'])
@@ -601,7 +629,6 @@ def trial_balance():
     creds = [x for x in temp_arr if x < 0]
     debs = [x for x in temp_arr if x > 0]
 
-
     if sum(creds) + sum(debs) != 0:
         flash(unbalanced, category="error")
         error = Error(error_desc=unbalanced)
@@ -654,13 +681,6 @@ def lpc():
     ledger_pending_count = db.session.query(Ledger).filter(Ledger.isApproved == 'Pending').all()
     lpc = len(ledger_pending_count)
     return lpc
-
- # Assets -- DEBIT
-    # Expenses -- DEBIT
-    # Liabilities -- CREDIT
-    # Equity -- DEBIT
-    # Revenue -- CREDIT
-    # Other ... -- DOESNT MATTER
 
     # Assets -- DEBIT
     # Expenses -- DEBIT

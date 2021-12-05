@@ -1,7 +1,11 @@
+from sqlalchemy.orm import backref
+
+# from werkzeug.datastructures import _CacheControl
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from . import db 
 from flask_login import UserMixin
+from sqlalchemy.sql import func
 from time import time
 import os
 import jwt
@@ -161,6 +165,12 @@ class Account(db.Model):
             return most_recent.entry_bal
 
 
+
+class EventLog(db.Model):
+    key = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    creator = db.Column(db.String(150), nullable=False)
+    event = db.Column(db.String(150), nullable=False)
+    event_date = db.Column(db.String(150), nullable=False)
 
 class Ledger(db.Model):
 

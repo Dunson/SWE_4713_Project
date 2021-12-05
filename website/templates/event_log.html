@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% extends "base.html" %} {% block title %} Admin Portal {% endblock %}
+
+{%block content%}
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h2>Event Log</h2>
+      <table class="table table-striped table-dark">
+      <thead style="position: sticky;">
+        <tr>
+          <th>ID#:</th>
+          <th>Creator</th>
+          <th>Event</th>
+          <th>Event Date</th>
+        </tr>
+      </thead>
+
+      <tbody style="overflow-y: scroll;">
+      {% for event in evall %}
+        <tr>
+            <td>{{ event.key }}</td>
+            <td>{{ event.creator }}</td>
+            <td>{{ event.event }}</td>
+            <td>{{ event.event_date }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+
+</body>
+</html>
+{% endblock %}

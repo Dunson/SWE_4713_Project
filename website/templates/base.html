@@ -58,6 +58,9 @@
                         <li class = "nav-item">
                     <a class = "nav-link text-light text-center" id = "homepage" href="/home">Home</a>
                         </li>
+                        <li class = "nav-item">
+                        <a class = "nav-link text-light text-center" id = "entries" href="/approvals">Entries</a>
+                 </li>
                         {% endif %}
 
                 {% if user.hasAdmin %}
@@ -68,7 +71,9 @@
                     <a class = "nav-link text-light text-center" id = "adminPort" href="/adminPortal">Admin Dashboard</a>
                 </li>
                  <li class = "nav-item">
+                    {% if lpc > 0 %}
                      <span class="badge badge-pill badge-danger" style="float:right;margin-bottom:-10px;">!</span>
+                        {% endif %}
                     <a class = "nav-link text-light text-center" id = "approvals" href="/approvals">Approvals</a>
                  </li>
                 {% endif %}
@@ -81,7 +86,9 @@
                     <a class = "nav-link text-light text-center" id = "adminPort" href="/adminPortal">Users</a>
                 </li>
                  <li class = "nav-item">
-                     <span class="badge badge-pill badge-danger" style="float:right;margin-bottom:-10px;">!</span>
+                     {% if lpc > 0 %}
+                            <span class="badge badge-pill badge-danger" style="float:right;margin-bottom:-10px;">!</span>
+                     {% endif %}
                     <a class = "nav-link text-light text-center" id = "approvals" href="/approvals">Approvals</a>
                  </li>
                 {% endif %}

@@ -64,11 +64,21 @@ def login():
             if user.hasAdmin == True and check_password_hash(user.password, password):
                 flash('Admin login successful!', category='success')
                 login_user(user)
+                event = EventLog(creator=User.query.get(current_user.id).userName,
+                                 event=f'User: {user.userName} logged in',
+                                 event_date=str(NOW.strftime("%Y-%m-%d, %H:%M:%S")))
+                db.session.add(event)
+                db.session.commit()
                 return redirect(url_for('auth.adminPort'))
 
             if check_password_hash(user.password, password):
                 flash('Login Successful!', category='success')
                 login_user(user)
+                event = EventLog(creator=User.query.get(current_user.id).userName,
+                                 event=f'User: {user.userName} logged in',
+                                 event_date=str(NOW.strftime("%Y-%m-%d, %H:%M:%S")))
+                db.session.add(event)
+                db.session.commit()
 
                 return redirect(url_for('views.home'))
             else:
@@ -81,6 +91,11 @@ def login():
             if check_password_hash(user.password, password):
                 flash('Login Successful!', category='success')
                 login_user(user)
+                event = EventLog(creator=User.query.get(current_user.id).userName,
+                                 event=f'User: {user.userName} logged in',
+                                 event_date=str(NOW.strftime("%Y-%m-%d, %H:%M:%S")))
+                db.session.add(event)
+                db.session.commit()
                 global ATTEMPT_COUNT
                 ATTEMPT_COUNT = 0
                 return redirect(url_for('views.home'))

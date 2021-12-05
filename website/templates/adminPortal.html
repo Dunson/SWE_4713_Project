@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% block title %} Admin Portal {% endblock %} {%block
 content%}
-<h1 class="text-center">Admin Dashboard</h1>
+<h1 class="text-center">User List</h1>
 <br />
 
 </div>
@@ -17,12 +17,12 @@ content%}
               <option name="userIndex" value="{{query[loop.index - 1].id}}">{{user.id}}</option>
               {% endfor %}
             </datalist>
-            <button class="btn btn-success" type="submit">Search</button>
+            <button class="btn btn-success" data-toggle="tooltip" data-placement="top" title="Go to the User Account associated with this user ID" type="submit">Search</button>
         </div>
     </form>
 
-  <div class="table-wrapper">
-    <table id="table_id" class="table table-dark table-striped">
+  <div>
+    <table id="table_id" class="table table-striped table-dark">
       <thead style="position: sticky;">
         <tr>
           <th>ID#:</th>
@@ -34,6 +34,7 @@ content%}
           <th>Date Created</th>
           <th>Status</th>
           <th>Link</th>
+          <th>Email User</th>
         </tr>
       </thead>
 
@@ -63,12 +64,13 @@ content%}
           <td style="color: red">Deactivated</td>
           {% endif %}
             <td>
-                <form method="POST">
-                    <button type="submit" class="btn btn-outline-light" value="{{ user.id }}">
-                        <a href="{{ url_for('auth.accountOverview') }}" >View Account</a>
+                <form method="POST" >
+                    <button type="submit" data-toggle="tooltip" data-placement="top" title="Go to this Users Account" name = "get_user" class="btn btn-success" value="{{ user.id }}">
+                      View User Account
                     </button>
                 </form>
             </td>
+            <td><a href="/email_user" class="link-primary">Send Email</a></td>
         </tr>
         {% endfor %}
       </tbody>

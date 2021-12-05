@@ -7,7 +7,9 @@
     </head>
 <br>
 <div class="container-fluid" style="height: 400px">
-    <table class="table table-striped table-dark">
+
+    <table id="table_id" class="table table-striped table-dark">
+
         <thead>
           <tr>
             <th scope="col">Account ID</th>
@@ -29,7 +31,7 @@
             <td>{{ledger.entry_deb}}</td>
             <td>{{ledger.entry_cred}}</td>
             <td>$ {{ledger.entry_bal}}</td>
-            <td><form method="post"><button name="pr" type="submit" class="btn btn-primary" value="{{ ledger.acc_num }}">Post Ref.</button></form></td>
+            <td><form method="post"><button name="pr" type="submit" data-toggle="tooltip" data-placement="top" title="Go to the associated Ledger with this Journal" class="btn btn-primary" value="{{ ledger.acc_num }}">Post Ref.</button></form></td>
           </tr>
           {% endfor %}
           
@@ -37,7 +39,7 @@
       </table>
 
       <div class="text-center">
-        <button class="btn btn-success" type="button" data-toggle="modal" data-target="#ledgermodal">Add Entry</button>
+        <button class="btn btn-success" data-toggle="tooltip" data-placement="top" title="Add an Entry to this Journal" type="button" data-toggle="modal" data-target="#ledgermodal">Add Entry</button>
       </div>
 
       <div class="modal fade" id="ledgermodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">

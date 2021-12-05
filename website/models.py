@@ -1,11 +1,6 @@
-from sqlalchemy.orm import backref
-
-# from werkzeug.datastructures import _CacheControl
 from werkzeug.security import generate_password_hash, check_password_hash
-
 from . import db 
 from flask_login import UserMixin
-from sqlalchemy.sql import func
 from time import time
 import os
 import jwt
@@ -42,13 +37,14 @@ class User(db.Model, UserMixin):
             db.session.commit()
 
     def get_reset_token(self, expires=500):
-        return jwt.encode({'reset_password': self.email, 'exp': time() + expires},
-                           key=os.getenv('HOME'),algorithm="HS256")
+        return jwt.encode({'reset_password': self.email,
+                           'exp': time() + expires},
+                          key="HOME", algorithm="HS256")
 
     @staticmethod
     def verify_reset_token(token):
         try:
-            email = jwt.decode(token, key=os.getenv('HOME'),algorithms="HS256")['reset_password']
+            email = jwt.decode(token, key="HOME", algorithms="HS256")['reset_password']
             print(email)
         except Exception as e:
             print(e)

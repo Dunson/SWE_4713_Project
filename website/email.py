@@ -5,12 +5,12 @@ from . import mail
 
 def send_recovery(user):
     token = user.get_reset_token()
-
+    print(token)
     msg = Message()
     msg.subject = "Reset Password"
     msg.sender = user.email
     msg.recipients = [user.email]
-    msg.html = render_template('reset_email.html', user = user, token = token)
+    msg.html = render_template('reset_email.html', user=user, token=token)
 
     mail.send(msg)
 

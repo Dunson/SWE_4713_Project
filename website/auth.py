@@ -1,3 +1,4 @@
+import os
 from os import error
 from smtplib import SMTPAuthenticationError
 
@@ -195,7 +196,7 @@ def recovery_Page():
         else:
             send_recovery(user)
             flash('Recovery email sent!', category='success')
-            event = EventLog(creator=User.query.get(current_user.id).userName, event= f'Recovery email sent for {user.userName}',
+            event = EventLog(creator="System", event= f'Recovery email sent for {user.userName}',
                              event_date=str(NOW.strftime("%Y-%m-%d, %H:%M:%S")))
             db.session.add(event)
             db.session.commit()
@@ -208,6 +209,7 @@ def recovery_Page():
 def reset_password(token):
 
     user = User.verify_reset_token(token)
+    print(user)
 
     if not user:
         flash(reset_token_expired, category='error')

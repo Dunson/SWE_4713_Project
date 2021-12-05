@@ -1,19 +1,14 @@
-from sqlalchemy.orm import backref
-
-# from werkzeug.datastructures import _CacheControl
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from . import db 
 from flask_login import UserMixin
-from sqlalchemy.sql import func
 from time import time
 import os
 import jwt
 import re
 import json
 from datetime import datetime, timedelta
-import smtplib
-from sqlalchemy import func
+
 
 
 # Defined User table for database
@@ -155,6 +150,17 @@ class Account(db.Model):
 
         return sum(approved_entries)
 
+    def led_bal(self):
+        list_acc_led = db.session.query(Ledger).filter(Ledger.acc_num == self.acc_num,
+                                                       Ledger.isApproved == "Approved").all()
+
+        if not list_acc_led:
+            return 0
+        most_recent = list_acc_led[-1]
+        if most_recent:
+            return most_recent.entry_bal
+
+
 
 class Ledger(db.Model):
 
@@ -206,8 +212,3 @@ class Ledger(db.Model):
 
         return corrected_balance
 
-    """
-    def get_total(self, an):
-        query = db.session.query(func.sum(self.entry_cred)).filter_by()
-        pass
-    """

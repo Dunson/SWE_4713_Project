@@ -513,9 +513,40 @@ def income_statement():
 @auth.route('/balance_sheet/', methods=['GET','POST'])
 def balance_sheet():
     id = current_user.id
-    return render_template('balance_sheet.html', user=current_user)  # account=current_user.accounts
 
+    accounts_list_by_user = Account.query.filter_by(user_id=id).all()
+    accounts_list = Account.query.join(User).filter(Account.user_id == id).all()
 
+    temp_arr = []
+    for item in accounts_list_by_user:
+        temp_arr.append(item)
+
+    debit_accounts = [x for x in temp_arr if x.acc_cat == "Assets" or x.acc_cat == "Expenses" or x.acc_cat == "Equity"]
+    credit_accounts = [x for x in temp_arr if x.acc_cat == "Revenue (income)"
+                       or x.acc_cat == "Liabilities"
+                       or x.acc_cat == "Other..."]
+
+    assets_list = [x for x in debit_accounts if x.acc_cat == "Assets"]
+    expenses_list = [x for x in debit_accounts if x.acc_cat == "Expenses"]
+    equity_list = [x for x in debit_accounts if x.acc_cat == "Equity"]
+    rev_list = [x for x in credit_accounts if x.acc_cat == "Revenue (income)"]
+    liab_list = [x for x in credit_accounts if x.acc_cat == "Liabilities"]
+    other_list = [x for x in credit_accounts if x.acc_cat == "Other..."]
+
+    total_debits = 0
+    for item in debit_accounts:
+        total_debits += item.total(item.acc_num)
+
+    total_credits = 0
+    for item in credit_accounts:
+        total_credits += item.total(item.acc_num)
+
+    return render_template('balance_sheet.html', user=current_user, accounts_list=accounts_list,
+                           acc_list_len=len(accounts_list), total_credits=total_credits, total_debits=total_debits,
+                           assets_list=assets_list, expenses_list=expenses_list, equity_list=equity_list,
+                           rev_list=rev_list, liab_list=liab_list, other_list=other_list,
+                           ass_list_len=len(assets_list), exp_list=len(expenses_list), eq_list=len(equity_list),
+                           rev_list_len=len(rev_list))
 
 
 @auth.route('/trial_balance/', methods=['GET','POST'])
@@ -539,10 +570,6 @@ def trial_balance():
         error.errorcreate(unbalanced, commit=True)
     else:
         flash("Trial Balance balances to 0!", category='success')
-
-    if request.method == "POST":
-        # pdf_convert = request.form.get('convert')
-        redirect(url_for('auth.trial_balance_pdf', name=id))
 
     return render_template('trial_balance.html', user=current_user,
                            accounts_list=Account.query.join(User).filter(Account.user_id == id),
@@ -577,7 +604,7 @@ def format_balance(float_variable):
     return formated_float
 
 
- # Assets -- DEBIT
+    # Assets -- DEBIT
     # Expenses -- DEBIT
     # Liabilities -- CREDIT
     # Equity -- DEBIT

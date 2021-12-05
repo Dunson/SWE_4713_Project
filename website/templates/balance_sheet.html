@@ -1,72 +1,124 @@
-<!DOCTYPE html>
-<html lang="en">
 
 {% extends "base.html" %} {% block title %} Reports {% endblock %}
 
 {% block content %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Reports</title>
 
-</head>
 <body>
 
-        <div class="table-wrapper">
+        <div class="table-wrapper container">
             <h2>Balance Sheet</h2>
             <table class="table table-hover table-dark">
-                <th>Asset</th>
+                <thead>
+                <th>Assets</th>
+                </thead>
+                <tbody>
+
                 <tr>
-                    <th>Description</th>
-                    <th>Debited</th>
-                    <th>Credited</th>
+                    <thead>
+                        <th>Name</th>
+                        <th>Debited</th>
+                        <th>Credited</th>
+                    </thead>
                 </tr>
+                {% for x in range(ass_list_len) %}
                 <tr>
-                    <td>x</td>
-                    <td>y</td>
-                    <td>z</td>
+                    <td>{{assets_list[x].acc_name}}</td>
+                    <td>{{assets_list[x].led_bal()}}</td>
+                    <td></td>
                 </tr>
-                <th>Expense</th>
+                {% endfor %}
+                </tbody>
+
+                <thead>
+                <th>Expenses</th>
+                </thead>
+
+                <tbody>
                 <tr>
-                    <th>Account Description</th>
-                    <th>Debited</th>
-                    <th>Credited</th>
+                    <thead>
+                        <th>Account Name</th>
+                        <th>Debited</th>
+                        <th>Credited</th>
+                    </thead>
                 </tr>
+
+                {% for x in range(exp_list) %}
                 <tr>
-                    <td>x</td>
-                    <td>y</td>
-                    <td>z</td>
+                    <td>{{expenses_list[x].acc_name}}</td>
+                    <td>{{expenses_list[x].led_bal()}}</td>
+                    <td></td>
                 </tr>
-                <th>Liability</th>
+                {% endfor %}
+                </tbody>
+
+                <thead>
+                <th>Equity</th>
+                </thead>
+
                 <tr>
-                    <th>Account Description</th>
-                    <th>Debited</th>
-                    <th>Credited</th>
+                    <thead>
+                        <th>Account Name</th>
+                        <th>Debited</th>
+                        <th>Credited</th>
+                    </thead>
                 </tr>
+
+                <tbody>
+                {% for x in range(eq_list) %}
                 <tr>
-                    <td>x</td>
-                    <td>y</td>
-                    <td>z</td>
+                    <td>{{equity_list[x].acc_name}}</td>
+                    <td>{{equity_list[x].led_bal()}}</td>
+                    <td></td>
                 </tr>
+                {% endfor %}
+
+                <thead>
                 <th>Revenue</th>
+                </thead>
+
                 <tr>
-                    <th>Account Description</th>
-                    <th>Debited</th>
-                    <th>Credited</th>
+                    <thead>
+                        <th>Account Name</th>
+                        <th>Debited</th>
+                        <th>Credited</th>
+                    </thead>
                 </tr>
+                {% for x in range(rev_list_len)%}
                 <tr>
-                    <td>x</td>
-                    <td>y</td>
-                    <td>z</td>
+                    <td>{{rev_list[x].acc_name}}</td>
+                    <td></td>
+                    <td>{{rev_list[x].led_bal()}}</td>
                 </tr>
-                <td>Total</td>
-                <td>x</td>
-                <td>y</td>
+                {% endfor %}
+                </tbody>
+                <thead>
+                <th>Equity</th>
+                </thead>
+
+                <tr>
+                    <thead>
+                        <th>Account Name</th>
+                        <th>Debited</th>
+                        <th>Credited</th>
+                    </thead>
+                </tr>
+                {% for x in range(eq_list)%}
+                <tr>
+                    <td>{{eq_list[x].acc_name}}</td>
+                    <td></td>
+                    <td>eq_list[x].led_bal()</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+                <tr>
+                    <td>Total</td>
+                    <td>{{total_debits}}</td>
+                    <td>{{total_credits}}</td>
+                </tr>
             </table>
             <button name="submitbutton" type="submit" class="btn btn-primary btn-block">Convert to PDF</button>
         </div>
-
 </body>
 
 {% endblock %}
-</html>

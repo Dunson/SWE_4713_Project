@@ -56,8 +56,8 @@
               <button class="btn btn-success" type="submit">View</button>
           </div>  
         </form>
-        <div>
-          <table class="table table-striped table-dark">
+        <div class="table-wrapper">
+          <table id="table_id" class="table table-striped table-dark">
             <thead>
               <tr>
                 <th scope="col">#</th>
@@ -76,7 +76,7 @@
                 <td>{{account.acc_desc}}</td>
                 <td>{{account.acc_cat}}</td>
                 <td>{{account.acc_statement}}</td>
-                <td><a href="/accountView/{{account.acc_num}}" class="link-info">View Account</a></td>
+                <td><a href="/accountView/{{user.id}}" class="link-info">View Account</a></td>
               </tr>
               {% endfor %}
             </tbody>

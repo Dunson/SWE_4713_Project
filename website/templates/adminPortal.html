@@ -29,7 +29,7 @@ content%}
           <th>Date Created</th>
           <th>Status</th>
           <th>Link</th>
-          <th>Email User</th>
+
         </tr>
       </thead>
 
@@ -65,7 +65,6 @@ content%}
                     </button>
                 </form>
             </td>
-            <td><a href="/email_user" class="link-primary">Send Email</a></td>
         </tr>
         {% endfor %}
       </tbody>
@@ -75,9 +74,12 @@ content%}
 <div>
 
 </div>
-<h1>Other Features</h1>
+<h1 class="text-center">Other Features</h1>
     <a class="btn btn-primary btn-lg btn-block" href="/event_log" role="button">Event Log</a>
     <a class="btn btn-primary btn-lg btn-block" href="/email_user" role="button">Email User</a>
 </div>
 
+<br>
+<br>
+<br>
 {% endblock %}

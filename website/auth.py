@@ -381,7 +381,6 @@ def newChart(id):
 @auth.route('/accountView/<id>', methods = ['GET', 'POST'])
 @login_required
 def view_account(id):
-    # id = Account.acc_num
 
     # POST request to add entry into ledger
     if request.method == 'POST':

@@ -168,7 +168,7 @@ def sign_up():
                             userName=userNameGenGlobal(firstName, lastName),
                             hasAdmin=False, hasMan=False, status=False,
                             creationDate=datetime.now(), expirationDate=datetime.now() + timedelta(days=365))
-            event = EventLog(creator=User.query.get(current_user.id).userName, event=f'New user {userNameGenGlobal(firstName,lastName)} added',
+            event = EventLog(creator=User.query.get(current_user.id).userName, event=f'New user added',
                              event_date=str(NOW.strftime("%Y-%m-%d, %H:%M:%S")))
             db.session.add(event)
             db.session.add(new_user)

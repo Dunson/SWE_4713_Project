@@ -15,3 +15,8 @@ User Credentials are as follows:
 | admin@test.com | Testing12! |
 | accountant@test.com | Ad839M$btPv@Y | 
 | manager@test.com | Testing12! | 
+
+# This Project was created by:
+-Brandon Dunson
+-Elijah Deputy
+-Derick Stevens
